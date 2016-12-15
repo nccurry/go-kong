@@ -16,13 +16,13 @@ type Apis struct {
 }
 
 type Api struct {
-	UpstreamURL      string `json:"upstream_url"`
-	StripRequestPath bool   `json:"strip_request_path"`
-	RequestPath      string `json:"request_path"`
-	ID               string `json:"id"`
-	CreatedAt        int64  `json:"created_at"`
-	PreserveHost     bool   `json:"preserve_host"`
-	Name             string `json:"name"`
+	UpstreamURL      string `json:"upstream_url,omitempty"`
+	StripRequestPath bool   `json:"strip_request_path,omitempty"`
+	RequestPath      string `json:"request_path,omitempty"`
+	ID               string `json:"id,omitempty"`
+	CreatedAt        int64  `json:"created_at,omitempty"`
+	PreserveHost     bool   `json:"preserve_host,omitempty"`
+	Name             string `json:"name,omitempty"`
 }
 
 func (s *ApisService) Get(apiName string) (*Api, *http.Response, error) {
@@ -54,6 +54,17 @@ func (s *ApisService) Patch(api *Api) (*http.Response, error) {
 
 	return resp, err
 
+}
+
+func (s *ApisService) Post(api *Api) (*http.Response, error) {
+	req, err := s.client.NewRequest("POST", "apis", api)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := s.client.Do(req, nil)
+
+	return resp, err
 }
 
 // ApisGetAllOptions specifies optional filter parameters to the ApisService.GetAll method
