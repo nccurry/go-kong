@@ -30,6 +30,7 @@ type Client struct {
 
 	// Services used for talking to different parts of the Kong API
 	Apis *ApisService
+	Consumers *ConsumersService
 }
 
 type service struct {
