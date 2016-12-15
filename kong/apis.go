@@ -8,13 +8,14 @@ import (
 // ApisService handles communication with the apis resource of Kong
 type ApisService service
 
-// Apis represents a list of Kong Apis
+// Apis represents a list of Kong APIs
 type Apis struct {
 	Data  []Api  `json:"data,omitempty"`
 	Total int    `json:"total,omitempty"`
 	Next  string `json:"next,omitempty"`
 }
 
+// Api represents a Kong API
 type Api struct {
 	UpstreamURL      string `json:"upstream_url,omitempty"`
 	StripRequestPath bool   `json:"strip_request_path,omitempty"`
@@ -25,8 +26,9 @@ type Api struct {
 	Name             string `json:"name,omitempty"`
 }
 
-func (s *ApisService) Get(apiName string) (*Api, *http.Response, error) {
-	u := fmt.Sprintf("apis/%v", apiName)
+// Get returns a single Kong API. The name or id property of the API can be used for api
+func (s *ApisService) Get(api string) (*Api, *http.Response, error) {
+	u := fmt.Sprintf("apis/%v", api)
 
 	req, err := s.client.NewRequest("GET", u, nil)
 	if err != nil {
@@ -42,6 +44,7 @@ func (s *ApisService) Get(apiName string) (*Api, *http.Response, error) {
 	return uResp, resp, err
 }
 
+// Patch updates a Kong API.
 func (s *ApisService) Patch(api *Api) (*http.Response, error) {
 	u := fmt.Sprintf("apis/%v", api.Name)
 
@@ -54,6 +57,23 @@ func (s *ApisService) Patch(api *Api) (*http.Response, error) {
 
 	return resp, err
 
+}
+
+// Delete removes a Kong API. The name or id field of an API can be used for api
+func (s *ApisService) Delete(api string) (*http.Response, error) {
+	u := fmt.Sprintf("apis/%v", api)
+
+	req, err := s.client.NewRequest("DELETE", u, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := s.client.Do(req, nil)
+	if err != nil {
+		return resp, err
+	}
+
+	return resp, err
 }
 
 func (s *ApisService) Post(api *Api) (*http.Response, error) {
