@@ -1,15 +1,19 @@
 package kong
 
 import (
-	"net/http"
-	"net/url"
-	"io"
 	"bytes"
 	"encoding/json"
+	"fmt"
+	"io"
+	"io/ioutil"
+	"net/http"
+	"net/url"
+	"reflect"
+	"github.com/google/go-querystring/query"
 )
 
 const (
-	contentType = "Content-Type"
+	contentType     = "Content-Type"
 	applicationJson = "application/json"
 )
 
@@ -21,19 +25,40 @@ type Client struct {
 	// BaseURL should always be specified with a trailing slash
 	BaseURL *url.URL
 
-        // Reuse a single struct instead of allocating one for each service on the heap
+	// Reuse a single struct instead of allocating one for each service on the heap
 	common service
 
 	// Services used for talking to different parts of the Kong API
 	Apis *ApisService
-
 }
 
 type service struct {
 	client *Client
 }
 
-func NewClient(httpClient *http.Client, baseURLStr string) (*Client, err) {
+// addOptions adds the parameters in opt as URL query parameters to s.  opt
+// must be a struct whose fields may contain "url" tags.
+func addOptions(s string, opt interface{}) (string, error) {
+	v := reflect.ValueOf(opt)
+	if v.Kind() == reflect.Ptr && v.IsNil() {
+		return s, nil
+	}
+
+	u, err := url.Parse(s)
+	if err != nil {
+		return s, err
+	}
+
+	qs, err := query.Values(opt)
+	if err != nil {
+		return s, err
+	}
+
+	u.RawQuery = qs.Encode()
+	return u.String(), nil
+}
+
+func NewClient(httpClient *http.Client, baseURLStr string) (*Client, error) {
 	if httpClient == nil {
 		httpClient = http.DefaultClient
 	}
@@ -79,4 +104,61 @@ func (c *Client) NewRequest(method, urlStr string, body interface{}) (*http.Requ
 	req.Header.Set("Accept", "application/json")
 
 	return req, nil
+}
+
+// Do sends an API request and returns the API response.  The API response is
+// JSON decoded and stored in the value pointed to by v, or returned as an
+// error if an API error has occurred.  If v implements the io.Writer
+// interface, the raw response body will be written to v, without attempting to
+// first decode it.
+func (c *Client) Do(req *http.Request, v interface{}) (*http.Response, error) {
+	resp, err := c.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	err = CheckResponse(resp)
+	if err != nil {
+		// even though there was an error, we still return the response
+		// in case the caller wants to inspect it further
+		return resp, err
+	}
+
+	if v != nil {
+		if w, ok := v.(io.Writer); ok {
+			io.Copy(w, resp.Body)
+		} else {
+			err = json.NewDecoder(resp.Body).Decode(v)
+			if err == io.EOF {
+				err = nil // ignore EOF errors caused by empty response body
+			}
+		}
+	}
+
+	return resp, err
+}
+
+type ErrorResponse struct {
+	Response    *http.Response // HTTP response that caused this error
+	KongMessage string         `json:"message,omitempty"`
+	KongError   string         `json:"error,omitempty"`
+}
+
+func (r *ErrorResponse) Error() string {
+	return fmt.Sprintf("%v %v: %d %v %v",
+		r.Response.Request.Method, r.Response.Request.URL,
+		r.Response.StatusCode, r.KongMessage, r.KongError)
+}
+
+func CheckResponse(r *http.Response) error {
+	if c := r.StatusCode; 200 <= c && c <= 299 {
+		return nil
+	}
+	errorResponse := &ErrorResponse{Response: r}
+	data, err := ioutil.ReadAll(r.Body)
+	if err == nil && data != nil {
+		json.Unmarshal(data, errorResponse)
+	}
+
+	return errorResponse // TODO: Return other kinds of errors
 }
