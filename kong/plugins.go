@@ -39,7 +39,7 @@ type Plugin struct {
 // For every Consumer and a specific API - Only set api_id in plugin
 // For a specific Consumer and API - Set both api_id and consumer_id in plugin
 func (s *PluginsService) Post(plugin *Plugin) (*http.Response, error) {
-	req, err := s.client.NewRequest("POST", "plugins")
+	req, err := s.client.NewRequest("POST", "plugins", plugin)
 	if err != nil {
 		return nil, err
 	}
