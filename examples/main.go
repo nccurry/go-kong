@@ -5,7 +5,10 @@ import (
 	"fmt"
 	"github.com/fatih/structs"
 	"strings"
-	"reflect"
+	"bytes"
+	"io"
+	"log"
+	"io/ioutil"
 )
 
 type Parent struct {
@@ -19,7 +22,6 @@ type Child struct {
 }
 
 func (c *Child) ToParent() *Parent {
-	fmt.Println(reflect.TypeOf(c.FieldTwo))
 
 	s := structs.New(c.FieldTwo)
 	fieldNames := s.Names()
@@ -31,7 +33,8 @@ func (c *Child) ToParent() *Parent {
 		fieldTwo[jsonTags[0]] = s.Field(v).Value()
 	}
 
-	parent := new(Parent)
+	parent := &c.Parent
+	parent.FieldTwo = fieldTwo
 	return parent
 }
 
@@ -51,7 +54,15 @@ func main() {
 
 	test := child.ToParent()
 	fmt.Printf("%+v", test)
-	myj, _ := json.Marshal(test)
-	fmt.Println(string(myj))
+	//myj, _ := json.Marshal(test)
 
+	var buf io.ReadWriter
+	buf = new(bytes.Buffer)
+	err := json.NewEncoder(buf).Encode(&test)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	b, _ := ioutil.ReadAll(buf)
+	fmt.Println(string(b))
 }

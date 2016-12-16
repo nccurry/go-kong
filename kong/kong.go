@@ -5,11 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"reflect"
 	"github.com/google/go-querystring/query"
+	"io/ioutil"
+	"log"
 )
 
 const (
@@ -31,6 +32,7 @@ type Client struct {
 	// Services used for talking to different parts of the Kong API
 	Apis *ApisService
 	Consumers *ConsumersService
+	Plugins *PluginsService
 }
 
 type service struct {
@@ -72,6 +74,8 @@ func NewClient(httpClient *http.Client, baseURLStr string) (*Client, error) {
 	c := &Client{client: httpClient, BaseURL: baseURL}
 	c.common.client = c
 	c.Apis = (*ApisService)(&c.common)
+	c.Consumers = (*ConsumersService)(&c.common)
+	c.Plugins = (*PluginsService)(&c.common)
 
 	return c, nil
 }
@@ -92,6 +96,9 @@ func (c *Client) NewRequest(method, urlStr string, body interface{}) (*http.Requ
 			return nil, err
 		}
 	}
+
+	b, _ := ioutil.ReadAll(buf)
+	log.Println(string(b))
 
 	req, err := http.NewRequest(method, u.String(), buf)
 	if err != nil {

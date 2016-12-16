@@ -1,8 +1,8 @@
 package kong
 
 import (
-	"github.com/fatih/structs"
 	"net/http"
+	"github.com/fatih/structs"
 	"strings"
 )
 
@@ -29,7 +29,7 @@ type Plugin struct {
 	Enabled bool `json:"enabled,omitempty"`
 	APIID string `json:"api_id,omitempty"`
 	ConsumerID string `json:"consumer_id,omitempty"`
-	Config map[string]interface{} `json:"config,omitempty"`
+	Config interface{} `json:"config,omitempty"`
 }
 
 // This method allows for a variety of plugin creation behaviors.
@@ -47,6 +47,21 @@ func (s *PluginsService) Post(plugin *Plugin) (*http.Response, error) {
 	resp, err := s.client.Do(req, nil)
 
 	return resp, err
+}
+
+func (s *PluginsService) GetAll() (*Plugins, *http.Response, error) {
+	req, err := s.client.NewRequest("GET", "plugins", nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	plugins := new(Plugins)
+	resp, err := s.client.Do(req, plugins)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return plugins, resp, err
 }
 
 // https://getkong.org/plugins/acl/
@@ -74,6 +89,7 @@ func (c *ACLPlugin) ToPlugin() *Plugin {
 	return plugin
 }
 
+
 type ACLConfig struct {
 	Whitelist []string `json:"whitelist,omitempty"`
 	Blacklist []string `json:"blacklist,omitempty"`
@@ -83,25 +99,6 @@ type ACLConfig struct {
 type RequestSizeLimitingPlugin struct {
 	Plugin
 	Config RequestSizeLimitingConfig `json:"config,omitempty"`
-}
-
-// ToPlugin converts RequestSizeLimitingPlugin to the more generic Plugin.
-// This assumes that Config does not contain nested fields
-func (c *RequestSizeLimitingPlugin) ToPlugin() *Plugin {
-	s := structs.New(c.Config)
-	fieldNames := s.Names()
-
-	config := make(map[string]interface{})
-
-	// Iterate over Config fields and create a map based on their json tags
-	for _, v := range fieldNames {
-		tags := strings.Split(s.Field(v).Tag("json"), ",")
-		config[tags[0]] = s.Field(v).Value()
-	}
-
-	plugin := &c.Plugin
-	plugin.Config = config
-	return plugin
 }
 
 type RequestSizeLimitingConfig struct {
@@ -118,10 +115,6 @@ type CorrelationIDConfig struct {
 	HeaderName string `json:"header_name,omitempty"`
 	Generator string `json:"generator,omitempty"`
 	EchoDownstream bool `json:"echo_downstream,omitempty"`
-}
-
-func (c *CorrelationIDConfig) ToMap() map[string]interface{} {
-	return structs.Map(c)
 }
 
 // https://getkong.org/plugins/rate-limiting/
@@ -146,10 +139,6 @@ type RateLimitingConfig struct {
 	RedisTimeout int `json:"redis_timeout,omitempty"`
 }
 
-func (c *RateLimitingConfig) ToMap() map[string]interface{} {
-	return structs.Map(c)
-}
-
 // https://getkong.org/plugins/jwt/
 type JWTPlugin struct {
 	Plugin
@@ -163,10 +152,6 @@ type JWTConfig struct {
 	SecretIsBase64 bool `json:"secret_is_base64,omitempty"`
 }
 
-func (c *JWTConfig) ToMap() map[string]interface{} {
-	return structs.Map(c)
-}
-
 // https://getkong.org/plugins/file-log/
 type FileLogPlugin struct {
 	Plugin
@@ -175,10 +160,6 @@ type FileLogPlugin struct {
 
 type FileLogConfig struct {
 	Path string `json:"path,omitempty"`
-}
-
-func (c *FileLogConfig) ToMap() map[string]interface{} {
-	return structs.Map(c)
 }
 
 // https://getkong.org/plugins/key-authentication/
@@ -190,9 +171,5 @@ type KeyAuthenticationPlugin struct {
 type KeyAuthenticationConfig struct {
 	KeyNames []string `json:"key_names,omitempty"`
 	HideCredentials bool `json:"hide_credentials,omitempty"`
-}
-
-func (c *KeyAuthenticationConfig) ToMap() map[string]interface{} {
-	return structs.Map(c)
 }
 
