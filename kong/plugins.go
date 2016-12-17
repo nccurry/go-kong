@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"github.com/fatih/structs"
 	"strings"
+	"reflect"
 )
 
 type PluginsService service
@@ -67,7 +68,7 @@ func (s *PluginsService) GetAll() (*Plugins, *http.Response, error) {
 // https://getkong.org/plugins/acl/
 type ACLPlugin struct {
 	Plugin
-	Config ACLConfig `json:"config,omitempty"`
+	Config *ACLConfig `json:"config,omitempty"`
 }
 
 // ToPlugin converts ACLPlugin to the more generic Plugin.
@@ -78,10 +79,17 @@ func (c *ACLPlugin) ToPlugin() *Plugin {
 
 	config := make(map[string]interface{})
 
-	// Iterate over Config fields and create a map based on their json tags
+	// Iterate over Config fields and create a map with keys based on the json tags
 	for _, v := range fieldNames {
 		tags := strings.Split(s.Field(v).Tag("json"), ",")
-		config[tags[0]] = s.Field(v).Value()
+
+		// isZero checks whether the value of the field v is 'zero'
+		// If it is, we do not need to add it to our map[string]interface{}
+		// Doing so causes errors later when we try to marshal to JSON
+		if ok := isZero(reflect.ValueOf(s.Field(v).Value())); !ok {
+			config[tags[0]] = s.Field(v).Value()
+		}
+
 	}
 
 	plugin := &c.Plugin

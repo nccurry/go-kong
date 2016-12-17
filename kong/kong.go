@@ -10,7 +10,6 @@ import (
 	"reflect"
 	"github.com/google/go-querystring/query"
 	"io/ioutil"
-	"log"
 )
 
 const (
@@ -97,9 +96,6 @@ func (c *Client) NewRequest(method, urlStr string, body interface{}) (*http.Requ
 		}
 	}
 
-	b, _ := ioutil.ReadAll(buf)
-	log.Println(string(b))
-
 	req, err := http.NewRequest(method, u.String(), buf)
 	if err != nil {
 		return nil, err
@@ -169,4 +165,35 @@ func CheckResponse(r *http.Response) error {
 	}
 
 	return errorResponse // TODO: Return other kinds of errors
+}
+
+// Checks if an interface{} is equal to it's underlying type's 'zero' value
+// Stolen from:
+// http://stackoverflow.com/questions/23555241/golang-reflection-how-to-get-zero-value-of-a-field-type
+func isZero(v reflect.Value) bool {
+	switch v.Kind() {
+	case reflect.Func, reflect.Map, reflect.Slice:
+		return v.IsNil()
+	case reflect.Array:
+		z := true
+		for i := 0; i < v.Len(); i++ {
+			z = z && isZero(v.Index(i))
+		}
+		return z
+	case reflect.Struct:
+		z := true
+		for i := 0; i < v.NumField(); i++ {
+			if v.Field(i).CanSet() {
+				z = z && isZero(v.Field(i))
+			}
+		}
+		return z
+	case reflect.Ptr:
+		return isZero(reflect.Indirect(v))
+	}
+	// Compare other types directly:
+	z := reflect.Zero(v.Type())
+	result := v.Interface() == z.Interface()
+
+	return result
 }
