@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 )
-
+/*
 func TestAPI_marshal(t *testing.T) {
 	testJSONMarshal(t, &Api{}, "{}")
 
@@ -31,7 +31,7 @@ func TestAPI_marshal(t *testing.T) {
 	}`
 	testJSONMarshal(t, a, want)
 }
-
+*/
 func TestApisService_Get(t *testing.T) {
 	stubSetup()
 	defer stubTeardown()
