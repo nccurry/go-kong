@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"testing"
 )
+
 /*
 func TestAPI_marshal(t *testing.T) {
 	testJSONMarshal(t, &Api{}, "{}")
