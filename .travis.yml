@@ -1,0 +1,19 @@
+sudo: false
+language: go
+go:
+  - 1.6.3
+  - 1.7
+matrix:
+  include:
+    - go: 1.6.3
+      script:
+        - go get -t -v ./...
+        - go get -v -race ./...
+  fast_finish: true
+install:
+  - # Do nothing. This is needed to prevent default install action "go get -t -v ./..." from happening here (we want it to happen inside script step).
+script:
+  - go get -t -v ./...
+  - diff -u <(echo -n) <(gofmt -d -s .)
+  - go tool vet .
+  - go test -v -race ./...
