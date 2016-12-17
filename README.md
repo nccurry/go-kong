@@ -8,7 +8,7 @@ go-kong is a Go client library for accessing Mashape's [Kong API](https://getkon
 ## Usage ##
 
 ```go
-import "github.com/google/go-github/github"
+import "github.com/spicyusername/go-kong/kong"
 ```
 
 Construct a new GitHub client, then use the various services on the client to
