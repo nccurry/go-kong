@@ -11,7 +11,7 @@ go-kong is a Go client library for accessing Mashape's [Kong API](https://getkon
 import "github.com/spicyusername/go-kong/kong"
 ```
 
-Construct a new GitHub client, then use the various services on the client to
+Construct a new Kong client, then use the various services on the client to
 access different parts of the Kong API. 
 
 For example:
