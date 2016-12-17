@@ -12,11 +12,13 @@ import "github.com/google/go-github/github"
 ```
 
 Construct a new GitHub client, then use the various services on the client to
-access different parts of the Kong API. For example:
+access different parts of the Kong API. 
+
+For example:
 
 ```go
 client := kong.NewClient(nil, "http://localhost:8001/")
 
-// list all organizations for user "willnorris"
+// Get information about the 'backend' api
 apis, _, err := client.Apis.Get("backend")
 ```
