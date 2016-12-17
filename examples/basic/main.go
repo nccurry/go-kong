@@ -24,8 +24,12 @@ func main() {
 		log.Fatal(err)
 	}
 
+
+
 	//createNewAPI(client)
-	aclConfig := &kong.ACLConfig{Whitelist: []string{"admins"}}
+	aclConfig := &kong.ACLConfig{
+		Whitelist: []string{"admins"},
+	}
 	aclPlugin := &kong.ACLPlugin{
 		Config: aclConfig,
 		Plugin: kong.Plugin{Name: "acl"},
