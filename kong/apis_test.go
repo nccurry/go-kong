@@ -62,9 +62,9 @@ func TestApisService_Patch(t *testing.T) {
 	stubSetup()
 	defer stubTeardown()
 
-	input := &Api{ID: "i"}
+	input := &Api{Name: "n"}
 
-	mux.HandleFunc("/apis/i", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/apis/n", func(w http.ResponseWriter, r *http.Request) {
 		v := new(Api)
 		json.NewDecoder(r.Body).Decode(v)
 		if !reflect.DeepEqual(v, input) {
@@ -74,6 +74,12 @@ func TestApisService_Patch(t *testing.T) {
 		testMethod(t, r, "PATCH")
 
 	})
+
+	_, err := client.Apis.Patch(input)
+	if err != nil {
+		t.Errorf("Apis.Patch returned error: %v", err)
+	}
+
 }
 
 func TestApisService_Delete(t *testing.T) {
@@ -86,7 +92,7 @@ func TestApisService_Delete(t *testing.T) {
 
 	_, err := client.Apis.Delete("i")
 	if err != nil {
-		t.Errorf("Apis.Get returned error: %v", err)
+		t.Errorf("Apis.Delete returned error: %v", err)
 	}
 }
 
@@ -106,6 +112,11 @@ func TestApisService_Post(t *testing.T) {
 		testMethod(t, r, "POST")
 
 	})
+
+	_, err := client.Apis.Post(input)
+	if err != nil {
+		t.Errorf("Apis.Post returned error: %v", err)
+	}
 }
 
 func TestApisService_GetAll(t *testing.T) {
