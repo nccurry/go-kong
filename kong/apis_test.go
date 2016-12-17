@@ -1,24 +1,24 @@
 package kong
 
 import (
-	"testing"
-	"net/http"
-	"fmt"
-	"reflect"
 	"encoding/json"
+	"fmt"
+	"net/http"
+	"reflect"
+	"testing"
 )
 
 func TestAPI_marshal(t *testing.T) {
 	testJSONMarshal(t, &Api{}, "{}")
 
 	a := &Api{
-		Name: "n",
-		CreatedAt: 1,
-		ID: "i",
-		PreserveHost: true,
-		RequestPath: "r",
+		Name:             "n",
+		CreatedAt:        1,
+		ID:               "i",
+		PreserveHost:     true,
+		RequestPath:      "r",
 		StripRequestPath: true,
-		UpstreamURL: "u",
+		UpstreamURL:      "u",
 	}
 	want := `{
 		"name": "n",

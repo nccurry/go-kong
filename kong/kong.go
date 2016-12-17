@@ -4,12 +4,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/google/go-querystring/query"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"reflect"
-	"github.com/google/go-querystring/query"
-	"io/ioutil"
 )
 
 const (
@@ -29,9 +29,9 @@ type Client struct {
 	common service
 
 	// Services used for talking to different parts of the Kong API
-	Apis *ApisService
+	Apis      *ApisService
 	Consumers *ConsumersService
-	Plugins *PluginsService
+	Plugins   *PluginsService
 }
 
 type service struct {

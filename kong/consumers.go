@@ -1,24 +1,24 @@
 package kong
 
 import (
-	"net/http"
-	"fmt"
 	"errors"
+	"fmt"
+	"net/http"
 )
 
 type ConsumersService service
 
 type Consumers struct {
-	Data []Consumer `json:"consumer,omitempty"`
-	Total int `json:"total,omitempty"`
-	Next string `json:"next,omitempty"`
+	Data  []Consumer `json:"consumer,omitempty"`
+	Total int        `json:"total,omitempty"`
+	Next  string     `json:"next,omitempty"`
 }
 
 type Consumer struct {
-	ID string `json:"id,omitempty"`
-	Username string `json:"username,omitempty"`
-	CustomID string `json:"custom_id,omitempty"`
-	CreatedAt int `json:"created_at,omitempty"`
+	ID        string `json:"id,omitempty"`
+	Username  string `json:"username,omitempty"`
+	CustomID  string `json:"custom_id,omitempty"`
+	CreatedAt int    `json:"created_at,omitempty"`
 }
 
 // Get returns a single Kong consumer. The consumer username or id can be used
@@ -88,11 +88,11 @@ func (s *ConsumersService) Post(consumer *Consumer) (*http.Response, error) {
 }
 
 type ConsumersGetAllOptions struct {
-	ID string `url:"id,omitempty"` // A filter on the list based on the consumer id field.
+	ID       string `url:"id,omitempty"`        // A filter on the list based on the consumer id field.
 	CustomID string `url:"custom_id,omitempty"` // A filter on the list based on the consumer custom_id field.
-	Username string `url:"username,omitempty"` // A filter on the list based on the consumer username field.
-	Size int `url:"size,omitempty"` // A limit on the number of objects to be returned.
-	Offset string `url:"offset,omitempty"` // A cursor used for pagination. offset is an object identifier that defines a place in the list.
+	Username string `url:"username,omitempty"`  // A filter on the list based on the consumer username field.
+	Size     int    `url:"size,omitempty"`      // A limit on the number of objects to be returned.
+	Offset   string `url:"offset,omitempty"`    // A cursor used for pagination. offset is an object identifier that defines a place in the list.
 }
 
 func (s *ConsumersService) GetAll(opt *ConsumersGetAllOptions) (*Consumers, *http.Response, error) {

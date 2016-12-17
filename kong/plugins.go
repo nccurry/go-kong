@@ -1,18 +1,18 @@
 package kong
 
 import (
-	"net/http"
 	"github.com/fatih/structs"
-	"strings"
+	"net/http"
 	"reflect"
+	"strings"
 )
 
 type PluginsService service
 
 type Plugins struct {
-	Data []Plugin `json:"consumer,omitempty"`
-	Total int `json:"total,omitempty"`
-	Next string `json:"next,omitempty"`
+	Data  []Plugin `json:"consumer,omitempty"`
+	Total int      `json:"total,omitempty"`
+	Next  string   `json:"next,omitempty"`
 }
 
 // Plugin defines a generic Kong plugin. Due to the fact that
@@ -24,13 +24,13 @@ type Plugins struct {
 // expose a ToGeneric method that will allow you to convert
 // them to the generic Plugin type if necessary.
 type Plugin struct {
-	ID string `json:"id,omitempty"`
-	Name string `json:"name,omitempty"`
-	CreatedAt int `json:"created_at,omitempty"`
-	Enabled bool `json:"enabled,omitempty"`
-	APIID string `json:"api_id,omitempty"`
-	ConsumerID string `json:"consumer_id,omitempty"`
-	Config interface{} `json:"config,omitempty"`
+	ID         string      `json:"id,omitempty"`
+	Name       string      `json:"name,omitempty"`
+	CreatedAt  int         `json:"created_at,omitempty"`
+	Enabled    bool        `json:"enabled,omitempty"`
+	APIID      string      `json:"api_id,omitempty"`
+	ConsumerID string      `json:"consumer_id,omitempty"`
+	Config     interface{} `json:"config,omitempty"`
 }
 
 // This method allows for a variety of plugin creation behaviors.
@@ -97,7 +97,6 @@ func (c *ACLPlugin) ToPlugin() *Plugin {
 	return plugin
 }
 
-
 type ACLConfig struct {
 	Whitelist []string `json:"whitelist,omitempty"`
 	Blacklist []string `json:"blacklist,omitempty"`
@@ -120,9 +119,9 @@ type CorrelationIDPlugin struct {
 }
 
 type CorrelationIDConfig struct {
-	HeaderName string `json:"header_name,omitempty"`
-	Generator string `json:"generator,omitempty"`
-	EchoDownstream bool `json:"echo_downstream,omitempty"`
+	HeaderName     string `json:"header_name,omitempty"`
+	Generator      string `json:"generator,omitempty"`
+	EchoDownstream bool   `json:"echo_downstream,omitempty"`
 }
 
 // https://getkong.org/plugins/rate-limiting/
@@ -132,19 +131,19 @@ type RateLimitingPlugin struct {
 }
 
 type RateLimitingConfig struct {
-	Second int `json:"second,omitempty"`
-	Minute int `json:"minute,omitempty"`
-	Hour int `json:"hour,omitempty"`
-	Day int `json:"day, omitempty"`
-	Month int `json:"month,omitempty"`
-	Year int `json:"year, omitempty"`
-	LimitBy string `json:"limit_by,omitempty"`
-	Policy string `json:"policy,omitempty"`
-	FaultTolerant bool `json:"fault_tolerant,omitempty"`
-	RedisHost string `json:"redis_host,omitempty"`
-	RedisPort string `json:"redis_port,omitempty"`
+	Second        int    `json:"second,omitempty"`
+	Minute        int    `json:"minute,omitempty"`
+	Hour          int    `json:"hour,omitempty"`
+	Day           int    `json:"day, omitempty"`
+	Month         int    `json:"month,omitempty"`
+	Year          int    `json:"year, omitempty"`
+	LimitBy       string `json:"limit_by,omitempty"`
+	Policy        string `json:"policy,omitempty"`
+	FaultTolerant bool   `json:"fault_tolerant,omitempty"`
+	RedisHost     string `json:"redis_host,omitempty"`
+	RedisPort     string `json:"redis_port,omitempty"`
 	RedisPassword string `json:"redis_password,omitempty"`
-	RedisTimeout int `json:"redis_timeout,omitempty"`
+	RedisTimeout  int    `json:"redis_timeout,omitempty"`
 }
 
 // https://getkong.org/plugins/jwt/
@@ -154,10 +153,10 @@ type JWTPlugin struct {
 }
 
 type JWTConfig struct {
-	URIParamNames []string `json:"uri_param_names,omitempty"`
+	URIParamNames  []string `json:"uri_param_names,omitempty"`
 	ClaimsToVerify []string `json:"claims_to_verify,omitempty"`
-	KeyClaimName string `json:"key_claim_name,omitempty"`
-	SecretIsBase64 bool `json:"secret_is_base64,omitempty"`
+	KeyClaimName   string   `json:"key_claim_name,omitempty"`
+	SecretIsBase64 bool     `json:"secret_is_base64,omitempty"`
 }
 
 // https://getkong.org/plugins/file-log/
@@ -177,7 +176,6 @@ type KeyAuthenticationPlugin struct {
 }
 
 type KeyAuthenticationConfig struct {
-	KeyNames []string `json:"key_names,omitempty"`
-	HideCredentials bool `json:"hide_credentials,omitempty"`
+	KeyNames        []string `json:"key_names,omitempty"`
+	HideCredentials bool     `json:"hide_credentials,omitempty"`
 }
-
