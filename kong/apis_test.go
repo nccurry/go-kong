@@ -42,18 +42,18 @@ func TestApisService_Get(t *testing.T) {
 		fmt.Fprint(w, `{"id":"i"}`)
 	})
 
-	user, _, err := client.Apis.Get("i")
+	api, _, err := client.Apis.Get("i")
 	if err != nil {
-		t.Errorf("Users.Get returned error: %v", err)
+		t.Errorf("Apis.Get returned error: %v", err)
 	}
 
 	want := &Api{ID: "i"}
-	if !reflect.DeepEqual(user, want) {
-		t.Errorf("Users.Get returned %+v, want %+v", user, want)
+	if !reflect.DeepEqual(api, want) {
+		t.Errorf("Apis.Get returned %+v, want %+v", api, want)
 	}
 }
 
-func TestUsersService_Get_invalidUser(t *testing.T) {
+func TestApisService_Get_invalidApi(t *testing.T) {
 	_, _, err := client.Apis.Get("%")
 	testURLParseError(t, err)
 }
@@ -74,4 +74,60 @@ func TestApisService_Patch(t *testing.T) {
 		testMethod(t, r, "PATCH")
 
 	})
+}
+
+func TestApisService_Delete(t *testing.T) {
+	stubSetup()
+	defer stubTeardown()
+
+	mux.HandleFunc("/apis/i", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "DELETE")
+	})
+
+	_, err := client.Apis.Delete("i")
+	if err != nil {
+		t.Errorf("Apis.Get returned error: %v", err)
+	}
+}
+
+func TestApisService_Post(t *testing.T) {
+	stubSetup()
+	defer stubTeardown()
+
+	input := &Api{ID: "i"}
+
+	mux.HandleFunc("/apis", func(w http.ResponseWriter, r *http.Request) {
+		v := new(Api)
+		json.NewDecoder(r.Body).Decode(v)
+		if !reflect.DeepEqual(v, input) {
+			t.Errorf("Request body = %+v, want %+v", v, input)
+		}
+
+		testMethod(t, r, "POST")
+
+	})
+}
+
+func TestApisService_GetAll(t *testing.T) {
+	stubSetup()
+	defer stubTeardown()
+
+	v := &Apis{Total: 1, Next: "n", Data: []Api{{ID: "i"}}}
+
+	mux.HandleFunc("/apis", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		testFormValues(t, r, values{"offset": "o", "request_host": "r"})
+		json.NewEncoder(w).Encode(v)
+	})
+
+	opt := &ApisGetAllOptions{Offset: "o", RequestHost: "r"}
+	apis, _, err := client.Apis.GetAll(opt)
+	if err != nil {
+		t.Errorf("Apis.GetAll returned error: %v", err)
+	}
+
+	want := &Apis{Total: 1, Next: "n", Data: []Api{{ID: "i"}}}
+	if !reflect.DeepEqual(apis, want) {
+		t.Errorf("Apis.GetAll returned %+v, want %+v", apis, want)
+	}
 }
