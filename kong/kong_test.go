@@ -53,7 +53,7 @@ func testHeader(t *testing.T, r *http.Request, header string, want string) {
 
 func testURLParseError(t *testing.T, err error) {
 	if err == nil {
-		t.Errorf("Expected error to be returned")
+		t.Error("Expected error to be returned")
 	}
 	if err, ok := err.(*url.Error); !ok || err.Op != "parse" {
 		t.Errorf("Expected URL parse error, got %+v", err)
@@ -70,7 +70,7 @@ func testBody(t *testing.T, r *http.Request, want string) {
 	}
 }
 
-// Helper function to test that a value is marshalled to JSON as expected.
+// Helper function to test that a value is marshaled to JSON as expected.
 func testJSONMarshal(t *testing.T, v interface{}, want string) {
 	j, err := json.Marshal(v)
 	if err != nil {
@@ -80,7 +80,7 @@ func testJSONMarshal(t *testing.T, v interface{}, want string) {
 	w := new(bytes.Buffer)
 	err = json.Compact(w, []byte(want))
 	if err != nil {
-		t.Errorf("String is not valid json: %s", want)
+		t.Errorf("String is` not valid json: %s", want)
 	}
 
 	if w.String() != string(j) {
