@@ -106,6 +106,12 @@ func TestPluginsService_Patch(t *testing.T) {
 	}
 }
 
+func TestPluginsService_Patch_invalidPlugin(t *testing.T) {
+	input := &Plugin{ID: "%"}
+	_, err := client.Plugins.Patch("a", input)
+	testURLParseError(t, err)
+}
+
 func TestPluginsService_Patch_badStatusCode(t *testing.T) {
 	stubSetup()
 	defer stubTeardown()
@@ -135,6 +141,11 @@ func TestPluginsService_Delete(t *testing.T) {
 	if err != nil {
 		t.Errorf("Plugins.Delete returned error: %v", err)
 	}
+}
+
+func TestPluginsService_Delete_invalidPlugin(t *testing.T) {
+	_, err := client.Plugins.Delete("a", "%")
+	testURLParseError(t, err)
 }
 
 func TestPluginsService_Delete_badStatusCode(t *testing.T) {
@@ -250,6 +261,11 @@ func TestPluginsService_GetSchema(t *testing.T) {
 	if !reflect.DeepEqual(schemas, want) {
 		t.Errorf("Plugins.GetEnabled returned %+v, want %+v", schemas, want)
 	}
+}
+
+func TestPluginsService_GetSchema_invalidSchema(t *testing.T) {
+	_, _, err := client.Plugins.GetSchema("%")
+	testURLParseError(t, err)
 }
 
 func TestPluginsService_GetSchema_badStatusCode(t *testing.T) {
