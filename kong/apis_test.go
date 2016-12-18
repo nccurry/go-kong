@@ -166,6 +166,13 @@ func TestApisService_Delete(t *testing.T) {
 	}
 }
 
+func TestApisService_Delete_invalidApi(t *testing.T) {
+	_, err := client.Apis.Delete("%")
+	if err == nil {
+		t.Error("Expected error to be returned")
+	}
+}
+
 func TestApisService_Delete_badStatusCode(t *testing.T) {
 	stubSetup()
 	defer stubTeardown()
@@ -201,6 +208,14 @@ func TestApisService_Post(t *testing.T) {
 	_, err := client.Apis.Post(input)
 	if err != nil {
 		t.Errorf("Apis.Post returned error: %v", err)
+	}
+}
+
+func TestApisService_Post_invalidApi(t *testing.T) {
+	input := &Api{Name: "%"}
+	_, err := client.Apis.Post(input)
+	if err == nil {
+		t.Error("Expected error to be returned")
 	}
 }
 

@@ -94,8 +94,16 @@ func TestConsumersService_Patch_byID(t *testing.T) {
 	}
 }
 
-func TestConsumersService_Patch_invalidConsumer(t *testing.T) {
+func TestConsumersService_Patch_missingUsernameOrID(t *testing.T) {
 	input := &Consumer{CustomID: "c"}
+	_, err := client.Consumers.Patch(input)
+	if err == nil {
+		t.Error("Expected error to be returned")
+	}
+}
+
+func TestConsumersService_Patch_invalidConsumer(t *testing.T) {
+	input := &Consumer{ID: "%"}
 	_, err := client.Consumers.Patch(input)
 	if err == nil {
 		t.Error("Expected error to be returned")
@@ -130,6 +138,13 @@ func TestConsumersService_Delete(t *testing.T) {
 	_, err := client.Consumers.Delete("i")
 	if err != nil {
 		t.Errorf("Consumers.Delete returned error: %v", err)
+	}
+}
+
+func TestConsumersService_Delete_invalidConsumer(t *testing.T) {
+	_, err := client.Consumers.Delete("%")
+	if err == nil {
+		t.Error("Expected error to be returned")
 	}
 }
 
@@ -168,6 +183,14 @@ func TestConsumersService_Post(t *testing.T) {
 	_, err := client.Consumers.Post(input)
 	if err != nil {
 		t.Errorf("Apis.Post returned error: %v", err)
+	}
+}
+
+func TestConsumersService_Post_invalidConsumer(t *testing.T) {
+	input := &Consumer{ID: "%"}
+	_, err := client.Consumers.Post(input)
+	if err == nil {
+		t.Error("Expected error to be returned")
 	}
 }
 
