@@ -1,44 +1,133 @@
 package kong
 
 import (
+	"fmt"
 	"github.com/fatih/structs"
 	"net/http"
 	"reflect"
 	"strings"
 )
 
+// PluginsService handles communication with Kong's '/plugins' resource
 type PluginsService service
 
+// Plugins represents the object returned from Kong when querying for
+// multiple plugin objects.
+//
+// In cases where the number of objects returned exceeds the maximum,
+// Next holds the URI for the next set of results.
+// i.e. "http://localhost:8001/plugins?size=2&offset=4d924084-1adb-40a5-c042-63b19db421d1"
 type Plugins struct {
 	Data  []Plugin `json:"consumer,omitempty"`
 	Total int      `json:"total,omitempty"`
 	Next  string   `json:"next,omitempty"`
 }
 
-// Plugin defines a generic Kong plugin. Due to the fact that
-// Config has multiple structures depending on the plugin
-// it is defined as a map[string]interface{} here.
+// Plugin represents a single Kong plugin object.
 //
-// One of the below Plugin definitions can be used if you know
-// the structure of Config. Each of the below Plugin structs
-// expose a ToGeneric method that will allow you to convert
-// them to the generic Plugin type if necessary.
+// Because there are a myriad of structures for the
+// Kong plugin config's, Plugin.Config is the generic
+// map[string]interface{}. Helper method's exist on the
+// more specific Plugin definitions to convert them to/from
+// this struct.
 type Plugin struct {
-	ID         string      `json:"id,omitempty"`
-	Name       string      `json:"name,omitempty"`
-	CreatedAt  int         `json:"created_at,omitempty"`
-	Enabled    bool        `json:"enabled,omitempty"`
-	APIID      string      `json:"api_id,omitempty"`
-	ConsumerID string      `json:"consumer_id,omitempty"`
-	Config     interface{} `json:"config,omitempty"`
+	ID         string                 `json:"id,omitempty"`
+	Name       string                 `json:"name,omitempty"`
+	CreatedAt  int                    `json:"created_at,omitempty"`
+	Enabled    bool                   `json:"enabled,omitempty"`
+	ApiID      string                 `json:"api_id,omitempty"`
+	ConsumerID string                 `json:"consumer_id,omitempty"`
+	Config     map[string]interface{} `json:"config,omitempty"`
 }
 
-// This method allows for a variety of plugin creation behaviors.
-// If you want to add a plugin for:
-// Every API and Consumer - Don't set api_id and consumer_id in plugin
-// Every API and a specific Consumer - Only set consumer_id in plugin
-// For every Consumer and a specific API - Only set api_id in plugin
-// For a specific Consumer and API - Set both api_id and consumer_id in plugin
+// PluginsService.Get queries for a single Kong plugin object by id
+//
+// Equivalent to GET /plugins/{id}
+func (s *PluginsService) Get(id string) (*Plugin, *http.Response, error) {
+	u := fmt.Sprintf("plugins/%v", id)
+
+	req, err := s.client.NewRequest("GET", u, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	uResp := new(Plugin)
+	resp, err := s.client.Do(req, uResp)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return uResp, resp, err
+}
+
+// EnabledPlugins represents the list of Plugins returned
+// when querying /plugins/enabled
+type EnabledPlugins struct {
+	Plugins []string `json:"enabled_plugins,omitempty"`
+}
+
+// PluginsService.GetEnabled queries for the list of all enabled
+// Kong plugins.
+func (s *PluginsService) GetEnabled() (*EnabledPlugins, *http.Response, error) {
+	req, err := s.client.NewRequest("GET", "plugins/enabled", nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	uResp := new(EnabledPlugins)
+	resp, err := s.client.Do(req, uResp)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return uResp, resp, err
+}
+
+// PluginsService.Patch updates an existing Kong plugin object for
+// a specific api. Accepts either api name or id.
+//
+// Equivalent to PATCH /apis/{name or id}/plugins/{id}
+func (s *PluginsService) Patch(api string, plugin *Plugin) (*http.Response, error) {
+	u := fmt.Sprintf("apis/%v/plugins/%v", api, plugin.ID)
+
+	req, err := s.client.NewRequest("PATCH", u, api)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := s.client.Do(req, nil)
+
+	return resp, err
+}
+
+// PluginsService.Delete deletes a single Kong plugin object attached
+// to a specifc api. Accepts either api name or id. Only accepts
+// plugin id.
+//
+// Equivalent to DELETE /apis/{name or id}/plugins/{id}
+func (s *PluginsService) Delete(api string, plugin string) (*http.Response, error) {
+	u := fmt.Sprintf("apis/%v/plugins/%v", api, plugin)
+
+	req, err := s.client.NewRequest("DELETE", u, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := s.client.Do(req, nil)
+	if err != nil {
+		return resp, err
+	}
+
+	return resp, err
+}
+
+// PluginsService.Post creates a new Kong plugin object.
+// Which consumer and api objects the plugin gets applied to
+// depend on the values of ConsumerID and ApiID on the
+// passed plugin object.
+//
+// For more info see:
+// https://getkong.org/docs/0.9.x/admin-api/#add-plugin
 func (s *PluginsService) Post(plugin *Plugin) (*http.Response, error) {
 	req, err := s.client.NewRequest("POST", "plugins", plugin)
 	if err != nil {
@@ -50,7 +139,27 @@ func (s *PluginsService) Post(plugin *Plugin) (*http.Response, error) {
 	return resp, err
 }
 
-func (s *PluginsService) GetAll() (*Plugins, *http.Response, error) {
+// PluginsGetAllOptions specifies optional filter parameters
+// to the PluginsService.GetAll method.
+//
+// Additional information about filtering options can be found in
+// the Kong documentation at:
+// https://getkong.org/docs/0.9.x/admin-api/#list-all-plugins
+type PluginsGetAllOptions struct {
+	ID         string `url:"id,omitempty"`          // A filter on the list based on the id field.
+	Name       string `url:"name,omitempty"`        // A filter on the list based on the name field.
+	ApiID      string `url:"api_id,omitempty"`      // A filter on the list based on the api_id field.
+	ConsumerID string `url:"consumer_id,omitempty"` // A filter on the list based on the consumer_id field.
+	Size       int    `url:"size,omitempty"`        // A limit on the number of objects to be returned.
+	Offset     string `url:"offset,omitempty"`      // A cursor used for pagination. offset is an object identifier that defines a place in the list.
+
+}
+
+// PluginsService.GetAll queries for all Kong plugins objects.
+// This query can be filtered by supplying the PluginsGetAllOptions struct.
+//
+// Equivalent to GET /plugins?uri=params&from=opt
+func (s *PluginsService) GetAll(opt *PluginsGetAllOptions) (*Plugins, *http.Response, error) {
 	req, err := s.client.NewRequest("GET", "plugins", nil)
 	if err != nil {
 		return nil, nil, err
@@ -65,7 +174,28 @@ func (s *PluginsService) GetAll() (*Plugins, *http.Response, error) {
 	return plugins, resp, err
 }
 
-// isZero is used when marhsaling the explicit plugin types to the
+// PluginsService.GetSchema queries for the schema of a particular
+// Kong plugin.
+//
+// Equivalent to GET /plugins/schema/{name}
+func (s *PluginsService) GetSchema(name string) (map[string]interface{}, *http.Response, error) {
+	u := fmt.Sprintf("plugins/schema/%v", name)
+
+	req, err := s.client.NewRequest("GET", u, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	uResp := make(map[string]interface{})
+	resp, err := s.client.Do(req, uResp)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return uResp, resp, err
+}
+
+// isZero is used when marshaling the explicit plugin types to the
 // more generic Plugin.
 //
 // Checks if an interface{} is equal to it's underlying type's 'zero'
