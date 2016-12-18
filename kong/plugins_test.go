@@ -230,3 +230,54 @@ func TestPluginsService_GetAll_badStatusCode(t *testing.T) {
 		t.Error("Expected error to be returned")
 	}
 }
+
+func TestPluginsService_GetSchema(t *testing.T) {
+	stubSetup()
+	defer stubTeardown()
+
+	mux.HandleFunc("/plugins/schema/s", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		fmt.Fprint(w, `{"f":"f"}`)
+	})
+
+	schemas, _, err := client.Plugins.GetSchema("s")
+	if err != nil {
+		t.Errorf("Plugins.Get returned error: %v", err)
+	}
+
+	want := make(map[string]interface{})
+	want["f"] = "f"
+	if !reflect.DeepEqual(schemas, want) {
+		t.Errorf("Plugins.GetEnabled returned %+v, want %+v", schemas, want)
+	}
+}
+
+func TestPluginsService_GetSchema_badStatusCode(t *testing.T) {
+	stubSetup()
+	defer stubTeardown()
+
+	mux.HandleFunc("/plugins/schema/s", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(400)
+		fmt.Fprint(w, `{"error":"e"}`)
+	})
+
+	_, _, err := client.Plugins.GetSchema("s")
+	if err == nil {
+		t.Error("Expected error to be returned")
+	}
+}
+
+func TestPluginsService_ToMap(t *testing.T) {
+	type T struct {
+		F1 string `json:"f_1,omitempty"`
+		F2 int    `json:"f_2,omitempty"`
+	}
+	v := &T{F1: "f1"}
+	got := ToMap(v)
+
+	want := make(map[string]interface{})
+	want["f_1"] = "f1"
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("ToMap returned %+v, want %+v", got, want)
+	}
+}
