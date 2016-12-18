@@ -58,7 +58,7 @@ func TestApisService_Get_invalidApi(t *testing.T) {
 	testURLParseError(t, err)
 }
 
-func TestApisService_Patch(t *testing.T) {
+func TestApisService_Patch_byName(t *testing.T) {
 	stubSetup()
 	defer stubTeardown()
 
@@ -79,7 +79,37 @@ func TestApisService_Patch(t *testing.T) {
 	if err != nil {
 		t.Errorf("Apis.Patch returned error: %v", err)
 	}
+}
 
+func TestApisService_Patch_byID(t *testing.T) {
+	stubSetup()
+	defer stubTeardown()
+
+	input := &Api{ID: "i"}
+
+	mux.HandleFunc("/apis/i", func(w http.ResponseWriter, r *http.Request) {
+		v := new(Api)
+		json.NewDecoder(r.Body).Decode(v)
+		if !reflect.DeepEqual(v, input) {
+			t.Errorf("Request body = %+v, want %+v", v, input)
+		}
+
+		testMethod(t, r, "PATCH")
+
+	})
+
+	_, err := client.Apis.Patch(input)
+	if err != nil {
+		t.Errorf("Apis.Patch returned error: %v", err)
+	}
+}
+
+func TestApisService_Patch_invalidApi(t *testing.T) {
+	input := &Api{RequestPath: "r"}
+	_, err := client.Apis.Patch(input)
+	if err == nil {
+		t.Error("Expected error to be returned")
+	}
 }
 
 func TestApisService_Delete(t *testing.T) {

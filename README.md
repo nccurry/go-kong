@@ -23,4 +23,7 @@ client := kong.NewClient(nil, "http://localhost:8001/")
 
 // Get information about the 'backend' api
 apis, _, err := client.Apis.Get("backend")
+
+// Get all consumer objects
+consumers, _, err := client.Consumers.GetAll(nil)
 ```
