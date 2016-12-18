@@ -6,19 +6,21 @@ import (
 	"net/http"
 )
 
-// ApisService handles communication with the kong /apis resource
+// ApisService handles communication with the kong '/apis' resource.
 type ApisService service
 
-// Apis represents the object returned from Kong when querying for multiple api objects
+// Apis represents the object returned from Kong when querying for multiple api objects.
+//
 // In cases where the number of objects returned exceeds the maximum, Next holds the
 // URI for the next set of results.
+// i.e. "http://localhost:8001/apis/?size=2&offset=4d924084-1adb-40a5-c042-63b19db421d1"
 type Apis struct {
 	Data  []Api  `json:"data,omitempty"`
 	Total int    `json:"total,omitempty"`
 	Next  string `json:"next,omitempty"`
 }
 
-// Api represents a Kong api object
+// Api represents a Kong api object.
 type Api struct {
 	UpstreamURL      string `json:"upstream_url,omitempty"`
 	StripRequestPath bool   `json:"strip_request_path,omitempty"`
@@ -52,7 +54,7 @@ func (s *ApisService) Get(api string) (*Api, *http.Response, error) {
 }
 
 // ApisService.Patch updates an existing kong api object.
-// At least one of api.Name or api.ID must be specified in the passed *Api parameter
+// At least one of api.Name or api.ID must be specified in the passed *Api parameter.
 // Equivalent to PATCH /apis/{name or id}
 //
 // The *http.Response from kong is returned if the caller wishes to do further inspection.
@@ -112,7 +114,8 @@ func (s *ApisService) Post(api *Api) (*http.Response, error) {
 	return resp, err
 }
 
-// ApisGetAllOptions specifies optional filter parameters to the ApisService.GetAll method
+// ApisGetAllOptions specifies optional filter parameters to the ApisService.GetAll method.
+//
 // Additional information about filtering options can be found in the Kong documentation at
 // https://getkong.org/docs/0.9.x/admin-api/#list-apis
 type ApisGetAllOptions struct {
@@ -126,7 +129,7 @@ type ApisGetAllOptions struct {
 }
 
 // ApisService.GetAll queries for all Kong api objects.
-// This query can be filtered by supplying the ApisGetAllOptions structure
+// This query can be filtered by supplying the ApisGetAllOptions struct.
 // Equivalent to GET /apis?uri=params&from=opt
 //
 // In addition to the *Apis object, the *http.Response from kong

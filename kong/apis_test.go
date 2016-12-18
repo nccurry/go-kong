@@ -58,6 +58,21 @@ func TestApisService_Get_invalidApi(t *testing.T) {
 	testURLParseError(t, err)
 }
 
+func TestApisService_Get_badStatusCode(t *testing.T) {
+	stubSetup()
+	defer stubTeardown()
+
+	mux.HandleFunc("/apis/i", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(400)
+		fmt.Fprint(w, `{"error":"e"}`)
+	})
+
+	_, _, err := client.Apis.Get("i")
+	if err == nil {
+		t.Error("Expected error to be returned")
+	}
+}
+
 func TestApisService_Patch_byName(t *testing.T) {
 	stubSetup()
 	defer stubTeardown()
@@ -112,6 +127,23 @@ func TestApisService_Patch_invalidApi(t *testing.T) {
 	}
 }
 
+func TestApisService_Patch_badStatusCode(t *testing.T) {
+	stubSetup()
+	defer stubTeardown()
+
+	mux.HandleFunc("/apis/i", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(400)
+		fmt.Fprint(w, `{"error":"e"}`)
+	})
+
+	input := &Api{ID: "i"}
+
+	_, err := client.Apis.Patch(input)
+	if err == nil {
+		t.Error("Expected error to be returned")
+	}
+}
+
 func TestApisService_Delete(t *testing.T) {
 	stubSetup()
 	defer stubTeardown()
@@ -123,6 +155,21 @@ func TestApisService_Delete(t *testing.T) {
 	_, err := client.Apis.Delete("i")
 	if err != nil {
 		t.Errorf("Apis.Delete returned error: %v", err)
+	}
+}
+
+func TestApisService_Delete_badStatusCode(t *testing.T) {
+	stubSetup()
+	defer stubTeardown()
+
+	mux.HandleFunc("/apis/i", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(400)
+		fmt.Fprint(w, `{"error":"e"}`)
+	})
+
+	_, err := client.Apis.Delete("i")
+	if err == nil {
+		t.Error("Expected error to be returned")
 	}
 }
 
@@ -146,6 +193,23 @@ func TestApisService_Post(t *testing.T) {
 	_, err := client.Apis.Post(input)
 	if err != nil {
 		t.Errorf("Apis.Post returned error: %v", err)
+	}
+}
+
+func TestApisService_Post_badStatusCode(t *testing.T) {
+	stubSetup()
+	defer stubTeardown()
+
+	mux.HandleFunc("/apis", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(400)
+		fmt.Fprint(w, `{"error":"e"}`)
+	})
+
+	input := &Api{ID: "i"}
+
+	_, err := client.Apis.Post(input)
+	if err == nil {
+		t.Error("Expected error to be returned")
 	}
 }
 
