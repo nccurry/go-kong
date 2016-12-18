@@ -120,6 +120,14 @@ func TestApisService_Patch_byID(t *testing.T) {
 }
 
 func TestApisService_Patch_invalidApi(t *testing.T) {
+	input := &Api{Name: "%"}
+	_, err := client.Apis.Patch(input)
+	if err == nil {
+		t.Error("Expected error to be returned")
+	}
+}
+
+func TestApisService_Patch_missingIDOrName(t *testing.T) {
 	input := &Api{RequestPath: "r"}
 	_, err := client.Apis.Patch(input)
 	if err == nil {
