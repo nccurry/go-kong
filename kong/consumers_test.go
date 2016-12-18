@@ -1,11 +1,11 @@
 package kong
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"reflect"
 	"testing"
-	"encoding/json"
 )
 
 func TestConsumersService_Get(t *testing.T) {

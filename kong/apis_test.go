@@ -251,4 +251,3 @@ func TestApisService_GetAll_badStatusCode(t *testing.T) {
 		t.Error("Expected error to be returned")
 	}
 }
-
