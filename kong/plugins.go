@@ -90,7 +90,7 @@ func (s *PluginsService) GetEnabled() (*EnabledPlugins, *http.Response, error) {
 func (s *PluginsService) Patch(api string, plugin *Plugin) (*http.Response, error) {
 	u := fmt.Sprintf("apis/%v/plugins/%v", api, plugin.ID)
 
-	req, err := s.client.NewRequest("PATCH", u, api)
+	req, err := s.client.NewRequest("PATCH", u, plugin)
 	if err != nil {
 		return nil, err
 	}
@@ -160,7 +160,12 @@ type PluginsGetAllOptions struct {
 //
 // Equivalent to GET /plugins?uri=params&from=opt
 func (s *PluginsService) GetAll(opt *PluginsGetAllOptions) (*Plugins, *http.Response, error) {
-	req, err := s.client.NewRequest("GET", "plugins", nil)
+	u, err := addOptions("plugins", opt)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	req, err := s.client.NewRequest("GET", u, nil)
 	if err != nil {
 		return nil, nil, err
 	}
