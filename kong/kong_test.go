@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"reflect"
 	"testing"
+	"io"
 )
 
 var (
@@ -23,15 +24,15 @@ var (
 	server *httptest.Server
 )
 
-// stubSetup creates a test HTTP server and a kong.client that is
-// configured to talk to the test server. Tests should register handlers which
-// provide stub responses for the API method being tested.
+// stubSetup creates a test HTTP server and a kong.Client that is
+// configured to talk to the test server.
+//
+// Tests should register handlers which provide stub responses for
+// the API method being tested.
 func stubSetup() {
-	// Test server
 	mux = http.NewServeMux()
 	server = httptest.NewServer(mux)
 
-	// Kong client configured to use the test server
 	client, _ = NewClient(nil, server.URL)
 }
 
@@ -39,6 +40,8 @@ func stubTeardown() {
 	server.Close()
 }
 
+// testMethod is used in stub http.HandleFunc's to check if
+// the appropriate HTTP Method was used by the client.
 func testMethod(t *testing.T, r *http.Request, want string) {
 	if got := r.Method; got != want {
 		t.Errorf("Request method: %v, want %v", got, want)
@@ -47,6 +50,8 @@ func testMethod(t *testing.T, r *http.Request, want string) {
 
 type values map[string]string
 
+// testFormValues is used in stub http.HandleFunc's to check
+// if the correct URI parameters were provided
 func testFormValues(t *testing.T, r *http.Request, values values) {
 	want := url.Values{}
 	for k, v := range values {
@@ -59,6 +64,8 @@ func testFormValues(t *testing.T, r *http.Request, values values) {
 	}
 }
 
+// testFormValues is used in stub http.HandleFunc's to check
+// if the correct Header was provided.
 func testHeader(t *testing.T, r *http.Request, header string, want string) {
 	if got := r.Header.Get(header); got != want {
 		t.Errorf("Header.Get(%q) returned %q, want %q", header, got, want)
@@ -74,6 +81,8 @@ func testURLParseError(t *testing.T, err error) {
 	}
 }
 
+// testBody is used in stub http.HandleFunc's to check
+// if the correct request body was provided.
 func testBody(t *testing.T, r *http.Request, want string) {
 	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -112,6 +121,27 @@ func testJSONMarshal(t *testing.T, v interface{}, want string) {
 	}
 }
 
+func TestAddOptions(t *testing.T) {
+	type T struct {
+		F string `url:"f,omitempty"`
+	}
+
+	opt := T{F: "v"}
+	got, _ := addOptions("s", opt)
+
+	want := "s?f=v"
+	if got != want {
+		t.Errorf("addOptions return is %v, want %v", got, want)
+	}
+}
+
+func TestAddOptions_badOpt(t *testing.T) {
+	_, err := addOptions("s", "%")
+	if err == nil {
+		t.Error("Expected error to be returned.")
+	}
+}
+
 func TestNewClient(t *testing.T) {
 	c, _ := NewClient(nil, "http://test:8001")
 
@@ -119,6 +149,13 @@ func TestNewClient(t *testing.T) {
 		t.Errorf("NewClient BaseURL is %v, want %v", got, want)
 	}
 
+}
+
+func TestNewClient_badUrlStr(t *testing.T) {
+	_, err := NewClient(nil, "%")
+	if err == nil {
+		t.Error("Expected error to be returned.")
+	}
 }
 
 const defaultBaseURL = "http://test:8001/"

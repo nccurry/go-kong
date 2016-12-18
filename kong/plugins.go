@@ -65,6 +65,39 @@ func (s *PluginsService) GetAll() (*Plugins, *http.Response, error) {
 	return plugins, resp, err
 }
 
+// isZero is used when marhsaling the explicit plugin types to the
+// more generic Plugin.
+//
+// Checks if an interface{} is equal to it's underlying type's 'zero'
+// value and should not be appended to Plugin.Config's map[string]interface{}
+func isZero(v reflect.Value) bool {
+	switch v.Kind() {
+	case reflect.Func, reflect.Map, reflect.Slice:
+		return v.IsNil()
+	case reflect.Array:
+		z := true
+		for i := 0; i < v.Len(); i++ {
+			z = z && isZero(v.Index(i))
+		}
+		return z
+	case reflect.Struct:
+		z := true
+		for i := 0; i < v.NumField(); i++ {
+			if v.Field(i).CanSet() {
+				z = z && isZero(v.Field(i))
+			}
+		}
+		return z
+	case reflect.Ptr:
+		return isZero(reflect.Indirect(v))
+	}
+	// Compare other types directly:
+	z := reflect.Zero(v.Type())
+	result := v.Interface() == z.Interface()
+
+	return result
+}
+
 // https://getkong.org/plugins/acl/
 type ACLPlugin struct {
 	Plugin
