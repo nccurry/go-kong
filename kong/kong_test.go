@@ -141,6 +141,13 @@ func TestAddOptions_badOpt(t *testing.T) {
 	}
 }
 
+func TestAddOptions_badUrl(t *testing.T) {
+	_, err := addOptions("&", struct{}{})
+	if err == nil {
+		t.Error("Expected error to be returned.")
+	}
+}
+
 func TestNewClient(t *testing.T) {
 	c, _ := NewClient(nil, "http://test:8001")
 
