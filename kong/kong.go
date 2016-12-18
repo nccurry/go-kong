@@ -204,5 +204,3 @@ func CheckResponse(r *http.Response) error {
 
 	return errorResponse // TODO: Return other kinds of errors
 }
-
-
