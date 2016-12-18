@@ -6,14 +6,21 @@ import (
 	"net/http"
 )
 
+// ConsumersService handles communication with Kong's '/consumers' resource.
 type ConsumersService service
 
+// Consumers represents the object returned from Kong when querying for multiple consumer objects.
+//
+// In cases where the number of objects returned exceeds the maximum, Next holds the
+// URI for the next set of results.
+// i.e. "http://localhost:8001/consumers/?size=2&offset=4d924084-1adb-40a5-c042-63b19db421d1"
 type Consumers struct {
 	Data  []Consumer `json:"consumer,omitempty"`
 	Total int        `json:"total,omitempty"`
 	Next  string     `json:"next,omitempty"`
 }
 
+// Consumer represents a single Kong consumer object
 type Consumer struct {
 	ID        string `json:"id,omitempty"`
 	Username  string `json:"username,omitempty"`
@@ -21,7 +28,9 @@ type Consumer struct {
 	CreatedAt int    `json:"created_at,omitempty"`
 }
 
-// Get returns a single Kong consumer. The consumer username or id can be used
+// ConsumersService.Get queries for a single Kong consumer object, by name or id.
+//
+// Equivalent to GET /consumers/{name or id}
 func (s *ConsumersService) Get(consumer string) (*Consumer, *http.Response, error) {
 	u := fmt.Sprintf("consumers/%v", consumer)
 
@@ -39,6 +48,11 @@ func (s *ConsumersService) Get(consumer string) (*Consumer, *http.Response, erro
 	return uResp, resp, err
 }
 
+// ConsumersService.Patch updates an existing Kong consumer object.
+// At least one of consumer.Username or consumer.ID must be specified
+// in the passed *Consumer parameter.
+//
+// Equivalent to PATCH /consumers/{username or id}
 func (s *ConsumersService) Patch(consumer *Consumer) (*http.Response, error) {
 	var u string
 	if consumer.ID != "" {
@@ -46,7 +60,7 @@ func (s *ConsumersService) Patch(consumer *Consumer) (*http.Response, error) {
 	} else if consumer.Username != "" {
 		u = fmt.Sprintf("consumers/%v", consumer.Username)
 	} else {
-		return nil, errors.New("You must specify either consumer username or id.")
+		return nil, errors.New("At least one of consumer.Username or consumer.ID must be specified")
 	}
 
 	req, err := s.client.NewRequest("PATCH", u, consumer)
@@ -59,9 +73,11 @@ func (s *ConsumersService) Patch(consumer *Consumer) (*http.Response, error) {
 	return resp, err
 }
 
-// Delete removes a Kong consumer. The username or id field can be used for consumer
+// ConsumersService.Delete deletes a single Kong consumer object, by name or id.
+//
+// Equivalent to DELETE /consumers/{username or id}
 func (s *ConsumersService) Delete(consumer string) (*http.Response, error) {
-	u := fmt.Sprintf("apis/%v", consumer)
+	u := fmt.Sprintf("consumers/%v", consumer)
 
 	req, err := s.client.NewRequest("DELETE", u, nil)
 	if err != nil {
@@ -76,6 +92,9 @@ func (s *ConsumersService) Delete(consumer string) (*http.Response, error) {
 	return resp, err
 }
 
+// ConsumersService.Post creates a new Kong consumer object.
+//
+// Equivalent to POST /consumers
 func (s *ConsumersService) Post(consumer *Consumer) (*http.Response, error) {
 	req, err := s.client.NewRequest("POST", "consumers", consumer)
 	if err != nil {
@@ -87,6 +106,12 @@ func (s *ConsumersService) Post(consumer *Consumer) (*http.Response, error) {
 	return resp, err
 }
 
+// ConsumersGetAllOptions specifies optional filter parameters to the
+// ConsumersService.GetAll method.
+//
+// Additional information about filtering options can be found in the
+// Kong documentation at:
+// https://getkong.org/docs/0.9.x/admin-api/#list-consumers
 type ConsumersGetAllOptions struct {
 	ID       string `url:"id,omitempty"`        // A filter on the list based on the consumer id field.
 	CustomID string `url:"custom_id,omitempty"` // A filter on the list based on the consumer custom_id field.
@@ -95,6 +120,10 @@ type ConsumersGetAllOptions struct {
 	Offset   string `url:"offset,omitempty"`    // A cursor used for pagination. offset is an object identifier that defines a place in the list.
 }
 
+// ConsumersService.GetAll queries for all Kong consumer objects.
+// This query can be filtered by supplying the ConsumersGetAllOptions struct.
+//
+// Equivalent to GET /consumers?uri=params&from=opt
 func (s *ConsumersService) GetAll(opt *ConsumersGetAllOptions) (*Consumers, *http.Response, error) {
 	u, err := addOptions("consumers", opt)
 	if err != nil {

@@ -6,13 +6,14 @@ import (
 	"net/http"
 )
 
-// ApisService handles communication with the kong '/apis' resource.
+// ApisService handles communication with Kong's '/apis' resource.
 type ApisService service
 
-// Apis represents the object returned from Kong when querying for multiple api objects.
+// Apis represents the object returned from Kong when querying for
+// multiple api objects.
 //
-// In cases where the number of objects returned exceeds the maximum, Next holds the
-// URI for the next set of results.
+// In cases where the number of objects returned exceeds the maximum,
+// Next holds the URI for the next set of results.
 // i.e. "http://localhost:8001/apis/?size=2&offset=4d924084-1adb-40a5-c042-63b19db421d1"
 type Apis struct {
 	Data  []Api  `json:"data,omitempty"`
@@ -20,7 +21,7 @@ type Apis struct {
 	Next  string `json:"next,omitempty"`
 }
 
-// Api represents a Kong api object.
+// Api represents a single Kong api object.
 type Api struct {
 	UpstreamURL      string `json:"upstream_url,omitempty"`
 	StripRequestPath bool   `json:"strip_request_path,omitempty"`
@@ -31,11 +32,9 @@ type Api struct {
 	Name             string `json:"name,omitempty"`
 }
 
-// ApisService.Get queries for a single kong api object, by name or id.
-// Equivalent to GET /apis/{name or id}
+// ApisService.Get queries for a single Kong api object, by name or id.
 //
-// In addition to the *Api object, the *http.Response from kong
-// is returned if the caller wishes to do further inspection.
+// Equivalent to GET /apis/{name or id}
 func (s *ApisService) Get(api string) (*Api, *http.Response, error) {
 	u := fmt.Sprintf("apis/%v", api)
 
@@ -53,11 +52,11 @@ func (s *ApisService) Get(api string) (*Api, *http.Response, error) {
 	return uResp, resp, err
 }
 
-// ApisService.Patch updates an existing kong api object.
-// At least one of api.Name or api.ID must be specified in the passed *Api parameter.
-// Equivalent to PATCH /apis/{name or id}
+// ApisService.Patch updates an existing Kong api object.
+// At least one of api.Name or api.ID must be specified in
+// the passed *Api parameter.
 //
-// The *http.Response from kong is returned if the caller wishes to do further inspection.
+// Equivalent to PATCH /apis/{name or id}
 func (s *ApisService) Patch(api *Api) (*http.Response, error) {
 	var u string
 	if api.Name != "" {
@@ -79,10 +78,9 @@ func (s *ApisService) Patch(api *Api) (*http.Response, error) {
 
 }
 
-// ApisService.Delete deletes a single kong api object, by name or id.
-// Equivalent to DELETE /apis/{name or id}
+// ApisService.Delete deletes a single Kong api object, by name or id.
 //
-// The *http.Response from kong is returned if the caller wishes to do further inspection.
+// Equivalent to DELETE /apis/{name or id}
 func (s *ApisService) Delete(api string) (*http.Response, error) {
 	u := fmt.Sprintf("apis/%v", api)
 
@@ -99,10 +97,9 @@ func (s *ApisService) Delete(api string) (*http.Response, error) {
 	return resp, err
 }
 
-// ApisService.Post cretes a new kong api object.
-// Equivalent to POST /apis
+// ApisService.Post creates a new Kong api object.
 //
-// The *http.Response from kong is returned if the caller wishes to do further inspection.
+// Equivalent to POST /apis
 func (s *ApisService) Post(api *Api) (*http.Response, error) {
 	req, err := s.client.NewRequest("POST", "apis", api)
 	if err != nil {
@@ -114,9 +111,11 @@ func (s *ApisService) Post(api *Api) (*http.Response, error) {
 	return resp, err
 }
 
-// ApisGetAllOptions specifies optional filter parameters to the ApisService.GetAll method.
+// ApisGetAllOptions specifies optional filter parameters to the
+// ApisService.GetAll method.
 //
-// Additional information about filtering options can be found in the Kong documentation at
+// Additional information about filtering options can be found in
+// the Kong documentation at:
 // https://getkong.org/docs/0.9.x/admin-api/#list-apis
 type ApisGetAllOptions struct {
 	ID          string `url:"id,omitempty"`           // A filter on the list based on the apis id field.
@@ -130,10 +129,8 @@ type ApisGetAllOptions struct {
 
 // ApisService.GetAll queries for all Kong api objects.
 // This query can be filtered by supplying the ApisGetAllOptions struct.
-// Equivalent to GET /apis?uri=params&from=opt
 //
-// In addition to the *Apis object, the *http.Response from kong
-// is returned if the caller wishes to do further inspection.
+// Equivalent to GET /apis?uri=params&from=opt
 func (s *ApisService) GetAll(opt *ApisGetAllOptions) (*Apis, *http.Response, error) {
 	u, err := addOptions("apis", opt)
 	if err != nil {

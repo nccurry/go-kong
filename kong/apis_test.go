@@ -236,3 +236,19 @@ func TestApisService_GetAll(t *testing.T) {
 		t.Errorf("Apis.GetAll returned %+v, want %+v", apis, want)
 	}
 }
+
+func TestApisService_GetAll_badStatusCode(t *testing.T) {
+	stubSetup()
+	defer stubTeardown()
+
+	mux.HandleFunc("/apis", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(400)
+		fmt.Fprint(w, `{"error":"e"}`)
+	})
+
+	_, _, err := client.Apis.GetAll(nil)
+	if err == nil {
+		t.Error("Expected error to be returned")
+	}
+}
+
