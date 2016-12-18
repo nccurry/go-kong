@@ -267,6 +267,33 @@ func TestPluginsService_GetSchema_badStatusCode(t *testing.T) {
 	}
 }
 
+func TestPluginsService_IsZero(t *testing.T) {
+	var f func()
+	if !isZero(reflect.ValueOf(f)) {
+		t.Error("Expected true for 'zero' function")
+	}
+	var m map[string]interface{}
+	if !isZero(reflect.ValueOf(m)) {
+		t.Error("Expected true for 'zero' map")
+	}
+	var s []string
+	if !isZero(reflect.ValueOf(s)) {
+		t.Error("Expected true for 'zero' slice")
+	}
+	var a [1]string
+	if !isZero(reflect.ValueOf(a)) {
+		t.Error("Expected true for 'zero' array")
+	}
+	var x struct{}
+	if !isZero(reflect.ValueOf(x)) {
+		t.Error("Expected true for 'zero' struct")
+	}
+	p := new(struct{})
+	if !isZero(reflect.ValueOf(p)) {
+		t.Error("Expected true for 'zero' pointer")
+	}
+}
+
 func TestPluginsService_ToMap(t *testing.T) {
 	type T struct {
 		F1 string `json:"f_1,omitempty"`
