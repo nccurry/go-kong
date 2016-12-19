@@ -282,6 +282,63 @@ func TestDo_noContent(t *testing.T) {
 	}
 }
 
+func TestErrorResponse_Error(t *testing.T) {
+	url, _ := url.Parse("http://test")
+	e := &ErrorResponse{
+		Response: &http.Response{
+			StatusCode: 200,
+			Request: &http.Request{
+				Method: "m",
+				URL:    url,
+			},
+		},
+		KongMessage: "m",
+		KongError:   "e",
+	}
+	want := "m http://test: 200 m e"
+	if e.Error() != want {
+		t.Fatalf("ErrorResponse.Error() did not return the correct string. got %v, want %v", e.Error(), want)
+	}
+}
+
+func TestConflictError_Error(t *testing.T) {
+	url, _ := url.Parse("http://test")
+	e := &ConflictError{
+		Response: &http.Response{
+			StatusCode: 200,
+			Request: &http.Request{
+				Method: "m",
+				URL:    url,
+			},
+		},
+		KongMessage: "m",
+		KongError:   "e",
+	}
+	want := "m http://test: 200 m e"
+	if e.Error() != want {
+		t.Fatalf("ConflictError.Error() did not return the correct string. got %v, want %v", e.Error(), want)
+	}
+}
+
+func TestNotFoundError_Error(t *testing.T) {
+	url, _ := url.Parse("http://test")
+	e := &NotFoundError{
+		Response: &http.Response{
+			StatusCode: 200,
+			Request: &http.Request{
+				Method: "m",
+				URL:    url,
+			},
+		},
+		KongMessage: "m",
+		KongError:   "e",
+	}
+	want := "m http://test: 200 m e"
+	if e.Error() != want {
+		t.Fatalf("ConflictError.Error() did not return the correct string. got %v, want %v", e.Error(), want)
+	}
+}
+
 func TestCheckResponse(t *testing.T) {
 	r := &http.Response{
 		StatusCode: 200,
