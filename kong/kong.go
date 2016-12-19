@@ -189,9 +189,24 @@ func (r *ErrorResponse) Error() string {
 		r.Response.StatusCode, r.KongMessage, r.KongError)
 }
 
+// ConflictError occurs when trying to create a resource that already exists.
+// CheckResponse will return this type of error when Kong returns a 409 status code.
+type ConflictError ErrorResponse
+
+func (r *ConflictError) Error() string {
+	return (*ErrorResponse)(r).Error()
+}
+
+// NotFoundError occurs when trying to access a resource that does not exist.
+// CheckResponse will return this type of error when Kong returns a 404 status code.
+type NotFoundError ErrorResponse
+
+func (r *NotFoundError) Error() string {
+	return (*ErrorResponse)(r).Error()
+}
+
 // CheckResponse looks at the response from a Kong API call
-// and decides whether to construct an ErrorResponse object
-// or not.
+// and determines what type of error needs to be returned, if any.
 func CheckResponse(r *http.Response) error {
 	if c := r.StatusCode; 200 <= c && c <= 299 {
 		return nil
@@ -202,5 +217,12 @@ func CheckResponse(r *http.Response) error {
 		json.Unmarshal(data, errorResponse)
 	}
 
-	return errorResponse // TODO: Return other kinds of errors
+	switch r.StatusCode {
+	case 404:
+		return (*NotFoundError)(errorResponse)
+	case 409:
+		return (*ConflictError)(errorResponse)
+	default:
+		return errorResponse
+	}
 }

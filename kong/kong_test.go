@@ -282,6 +282,52 @@ func TestDo_noContent(t *testing.T) {
 	}
 }
 
+func TestCheckResponse(t *testing.T) {
+	r := &http.Response{
+		StatusCode: 200,
+	}
+	err := CheckResponse(r)
+	if err != nil {
+		t.Fatalf("CheckResponse returned unexpected error: %v", err)
+	}
+}
+
+func TestCheckResponse_badStatusCode(t *testing.T) {
+	r := &http.Response{
+		StatusCode: 400,
+		Body:       ioutil.NopCloser(bytes.NewBufferString(`{"error": "e"}`)),
+	}
+	err := CheckResponse(r)
+	_, ok := err.(*ErrorResponse)
+	if !ok {
+		t.Fatal("CheckResponse returned the incorrect error type")
+	}
+}
+
+func TestCheckResponse_notFoundStatusCode(t *testing.T) {
+	r := &http.Response{
+		StatusCode: 404,
+		Body:       ioutil.NopCloser(bytes.NewBufferString(`{"error": "e"}`)),
+	}
+	err := CheckResponse(r)
+	_, ok := err.(*NotFoundError)
+	if !ok {
+		t.Fatal("CheckResponse returned the incorrect error type")
+	}
+}
+
+func TestCheckResponse_conflictStatusCode(t *testing.T) {
+	r := &http.Response{
+		StatusCode: 409,
+		Body:       ioutil.NopCloser(bytes.NewBufferString(`{"error": "e"}`)),
+	}
+	err := CheckResponse(r)
+	_, ok := err.(*ConflictError)
+	if !ok {
+		t.Fatal("CheckResponse returned the incorrect error type")
+	}
+}
+
 // TODO
 // func TestCheckResponse(t *testing.T) {
 // func TestCheckResponse_noBody(t *testing.T) {
