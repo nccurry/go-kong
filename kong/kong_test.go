@@ -142,7 +142,7 @@ func TestAddOptions_badOpt(t *testing.T) {
 }
 
 func TestAddOptions_badUrl(t *testing.T) {
-	_, err := addOptions("&", struct{}{})
+	_, err := addOptions("%", struct{}{})
 	if err == nil {
 		t.Error("Expected error to be returned.")
 	}
