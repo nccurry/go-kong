@@ -20,13 +20,25 @@ access different parts of the Kong API.
 For example:
 
 ```go
-client := kong.NewClient(nil, "http://localhost:8001/")
+package main
 
-// Get information about the 'backend' api
-api, _, err := client.Apis.Get("backend")
+import (
+        "github.com/spicyusername/go-kong/kong"
+        "fmt"
+)
 
-// Get all consumer objects
-consumers, _, err := client.Consumers.GetAll(nil)
+func main() {
+    client := kong.NewClient(nil, "http://localhost:8001/")
+    
+    // Get information about the 'backend' api
+    api, _, _ := client.Apis.Get("backend")
+    fmt.Printf("%+v", api)
+    
+    // Get all consumer objects
+    consumers, _, _ := client.Consumers.GetAll(nil)
+    fmt.Printf("%+v", consumers)
+}
+
 ```
 
 ## Apis ##
@@ -75,4 +87,24 @@ resp, err := client.Consumers.Patch(consumer)
 
 // DELETE /consumers/admin
 resp, err := client.Consumers.Delete("admin")
+```
+
+## Plugins ##
+
+```go
+// GET /plugins
+
+// GET /plugins?size=15&name=acl
+
+// GET /plugins/4def15f5-0697-4956-a2b0-9ae079b686bb
+
+// GET /plugins/enabled
+
+// GET /plugins/schema/acl
+
+// POST /plugins
+
+// PATCH /plugins
+
+// DELETE /plugins/4def15f5-0697-4956-a2b0-9ae079b686bb
 ```
