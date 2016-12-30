@@ -148,7 +148,7 @@ type ACLConsumerConfig struct {
 	Group string `json:"group"`
 }
 
-func (s *ConsumersService) ConfigurePlugin(consumer, plugin string, config interface{}) (*http.Response, error){
+func (s *ConsumersService) ConfigurePlugin(consumer, plugin string, config interface{}) (*http.Response, error) {
 	u := fmt.Sprintf("consumers/%v/%v", consumer, plugin)
 
 	req, err := s.client.NewRequest("POST", u, config)
