@@ -143,3 +143,20 @@ func (s *ConsumersService) GetAll(opt *ConsumersGetAllOptions) (*Consumers, *htt
 
 	return consumers, resp, err
 }
+
+type ACLConsumerConfig struct {
+	Group string `json:"group"`
+}
+
+func (s *ConsumersService) ConfigurePlugin(consumer, plugin string, config interface{}) (*http.Response, error){
+	u := fmt.Sprintf("consumers/%v/%v", consumer, plugin)
+
+	req, err := s.client.NewRequest("POST", u, config)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := s.client.Do(req, nil)
+
+	return resp, err
+}
