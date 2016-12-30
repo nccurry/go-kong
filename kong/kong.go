@@ -93,7 +93,7 @@ func NewClient(httpClient *http.Client, baseURLStr string) (*Client, error) {
 	c := &Client{client: httpClient, BaseURL: baseURL}
 	c.common.client = c
 	c.Apis = (*ApisService)(&c.common)
-	c.Consumers = (*ConsumersService)(&c.common)
+	c.Consumers = &ConsumersService{&c.common, (*ConsumersACLService)(&c.common)}
 	c.Plugins = (*PluginsService)(&c.common)
 
 	return c, nil
@@ -213,6 +213,7 @@ func CheckResponse(r *http.Response) error {
 	}
 	errorResponse := &ErrorResponse{Response: r}
 	data, err := ioutil.ReadAll(r.Body)
+
 	if err == nil && data != nil {
 		json.Unmarshal(data, errorResponse)
 	}

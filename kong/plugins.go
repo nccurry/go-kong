@@ -18,7 +18,7 @@ type PluginsService service
 // Next holds the URI for the next set of results.
 // i.e. "http://localhost:8001/plugins?size=2&offset=4d924084-1adb-40a5-c042-63b19db421d1"
 type Plugins struct {
-	Data  []Plugin `json:"consumer,omitempty"`
+	Data  []Plugin `json:"data,omitempty"`
 	Total int      `json:"total,omitempty"`
 	Next  string   `json:"next,omitempty"`
 }
@@ -274,6 +274,51 @@ func ToMap(config interface{}) map[string]interface{} {
 		}
 	}
 	return c
+}
+
+// FromMap is used to marshal a map[string]interface{} to a more specific
+// plugin struct definition by matching the json tags to the struct keys
+func FromMap(configStruct interface {}, configMap map[string]interface{}) error {
+	for k, v := range configMap {
+		err := SetJSONField(configStruct, k, v)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// SetField is used to convert entries in a map to struct fields
+// It matches map keys to json tags
+func SetJSONField(obj interface{}, name string, value interface{}) error {
+	v := reflect.ValueOf(obj).Elem()
+	var structFieldValue reflect.Value
+	for i := 0; i < v.NumField(); i++ {
+		f := v.Type().Field(i)
+		jsonTags := strings.Split(f.Tag.Get("json"), ",")
+		if jsonTags[0] == name {
+			structFieldValue = v.Field(i)
+			break
+		}
+	}
+
+	if !structFieldValue.IsValid() {
+		return fmt.Errorf("No field with json tag %s in obj", name)
+	}
+
+	if !structFieldValue.CanSet() {
+		return fmt.Errorf("Cannot set %s field value", name)
+	}
+
+	//structFieldType := structFieldValue.Type()
+	val := reflect.ValueOf(value)
+	/*
+	if structFieldType != val.Type() {
+		return errors.New("Provided value type didn't match obj field type")
+	}
+	*/
+	structFieldValue.Set(val)
+	return nil
 }
 
 type ACLConfig struct {
