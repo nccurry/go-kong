@@ -3,7 +3,7 @@
 [![GoDoc](https://godoc.org/github.com/spicyusername/go-kong/kong?status.svg)](https://godoc.org/github.com/spicyusername/go-kong/kong) 
 [![Build Status](https://travis-ci.org/spicyusername/go-kong.svg?branch=master)](https://travis-ci.org/spicyusername/go-kong) 
 [![Coverage Status](https://coveralls.io/repos/github/spicyusername/go-kong/badge.svg?branch=master)](https://coveralls.io/github/spicyusername/go-kong?branch=master) 
-[![Go Report Card](https://goreportcard.com/badge/github.com/spicyusername/go-separatelyps://goreportcard.com/report/github.com/spicyusername/go-kong)  
+[![Go Report Card](https://goreportcard.com/badge/github.com/spicyusername/go-kong)](https://goreportcard.com/report/github.com/spicyusername/go-kong) 
 
 go-kong is a Go client library for accessing Mashape's [Kong API](https://getkong.org/docs/0.9.x/admin-api/).
 
