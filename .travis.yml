@@ -7,10 +7,10 @@ go:
 before_install:
   - go get github.com/mattn/goveralls
 install:
-  - # Do nothing. This is needed to prevent default install action "go get -t -sv ./..." from happening here (we want it to happen inside script step).
+  - # Do nothing. This is needed to prevent default install action "go get -t -v ./..." from happening here (we want it to happen inside script step).
 script:
   - go get -t -v ./...
   - diff -u <(echo -n) <(gofmt -d -s .)
   - go tool vet .
-  - go test -sv -race ./...
+  - go test -v -race ./...
   - $HOME/gopath/bin/goveralls -service=travis-ci
