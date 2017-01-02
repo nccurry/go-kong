@@ -311,16 +311,67 @@ func TestPluginsService_IsZero(t *testing.T) {
 }
 
 func TestPluginsService_ToMap(t *testing.T) {
-	type T struct {
+	type S struct {
 		F1 string `json:"f_1,omitempty"`
 		F2 int    `json:"f_2,omitempty"`
 	}
-	v := &T{F1: "f1"}
-	got := ToMap(v)
+	s := &S{F1: "f1"}
+	got := ToMap(s)
 
 	want := make(map[string]interface{})
 	want["f_1"] = "f1"
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("ToMap returned %+v, want %+v", got, want)
+	}
+}
+
+func TestPluginsService_FromMap(t *testing.T) {
+	type S struct {
+		F1 string   `json:"f_1,omitempty"`
+		F2 int      `json:"f_2,omitempty"`
+		F3 []string `json:"f_3,omitempty"`
+	}
+
+	got := &S{}
+	j := []byte(`{"f_1": "s", "f_2": 1, "f_3": ["s", "s"]}`)
+	m := make(map[string]interface{})
+	json.Unmarshal(j, &m)
+
+	err := FromMap(got, m)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	want := &S{F1: "s", F2: 1, F3: []string{"s", "s"}}
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("Error convering map to struct. got %v, want %v", got, want)
+	}
+}
+
+func TestPluginsService_SetJSONField(t *testing.T) {
+	type S struct {
+		F1 string   `json:"f_1,omitempty"`
+		F2 int      `json:"f_2,omitempty"`
+		F3 []string `json:"f_3,omitempty"`
+	}
+
+	s := &S{}
+	j := []byte(`{"f_1": "s", "f_2": 1, "f_3": ["s", "s"]}`)
+	m := make(map[string]interface{})
+	json.Unmarshal(j, &m)
+
+	err := SetJSONField(s, "f_1", m["f_1"])
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = SetJSONField(s, "f_2", m["f_2"])
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = SetJSONField(s, "f_3", m["f_3"])
+	if err != nil {
+		t.Fatal(err)
 	}
 }

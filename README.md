@@ -9,7 +9,7 @@ go-kong is a Go client library for accessing Mashape's [Kong API](https://getkon
 
 ## Install ##
 
-```go
+```bash
 go get "github.com/spicyusername/go-kong/kong"
 ```
 
@@ -24,22 +24,51 @@ For example:
 package main
 
 import (
+        "log"
         "github.com/spicyusername/go-kong/kong"
-        "fmt"
 )
 
 func main() {
-    client := kong.NewClient(nil, "http://localhost:8001/")
+    // Create new client
+    client, _ := kong.NewClient(nil, "http://localhost:8001/")
     
     // Get information about the 'backend' api
     api, _, _ := client.Apis.Get("backend")
-    fmt.Printf("%+v", api)
+    log.Println(api.ID)
+
+    // Create a new api called 'middletier'
+    mtApi := &kong.Api{Name: "middletier", RequestPath: "/mt/v0", UpstreamURL: "http://mt.my.org:8080"}
+    _, err := client.Apis.Post(mtApi)
+    if ok := err.(kong.ConflictError); ok {
+        log.Printf("Endpoint with name %s already exists.", mtApi.Name)
+    } else if err != nil {
+        log.Fatal(err)
+    }
     
     // Get all consumer objects
     consumers, _, _ := client.Consumers.GetAll(nil)
-    fmt.Printf("%+v", consumers)
-}
+    for _, v := range consumers.Data {
+        log.Println(v.Username)
+    }
 
+    // Apply ACL plugin to all all apis
+    aclConfig := &kong.ACLConfig{Whitelist: []string{"users", "admins"}, Blacklist: []string{"blocked"}}
+    plugin := &kong.Plugin{Name: "acl", Config: kong.ToMap(aclConfig)}
+    _, err = client.Plugins.Post(plugin)
+    if err != nil {
+        log.Fatal(err)
+    }
+    
+    // Add ACL group to consumer
+    aclConsumerConfig := &kong.ACLConsumerConfig{Group: "users"}
+    consumerName := "paul.atreides"
+    _, err = client.Consumers.ACL.Configure(consumerName, aclConsumerConfig)
+    if ok := err.(kong.NotFoundError); ok {
+        log.Printf("Could not find consumer with name %s", consumerName)
+    } else if err != nil {
+        log.Fatal(err)
+    }
+}
 ```
 
 ## Apis ##
@@ -47,7 +76,7 @@ func main() {
 // GET /apis
 apis, resp, err := client.Apis.GetAll(nil)
 
-// GET /apis?size=10&name=myapi
+// GET /apis?size=10&mapKey=myapi
 opt := &ApisGetAllOptions{Size: 10, Name: "myapi"}
 apis, resp, err := client.Apis.GetAll(opt)
 
@@ -95,7 +124,7 @@ resp, err := client.Consumers.Delete("admin")
 ```go
 // GET /plugins
 
-// GET /plugins?size=15&name=acl
+// GET /plugins?size=15&mapKey=acl
 
 // GET /plugins/4def15f5-0697-4956-a2b0-9ae079b686bb
 

@@ -1,6 +1,7 @@
 package kong
 
 import (
+	"errors"
 	"fmt"
 	"github.com/fatih/structs"
 	"net/http"
@@ -278,7 +279,12 @@ func ToMap(config interface{}) map[string]interface{} {
 
 // FromMap is used to marshal a map[string]interface{} to a more specific
 // plugin struct definition by matching the json tags to the struct keys
-func FromMap(configStruct interface {}, configMap map[string]interface{}) error {
+//
+// Generally this is used when converting the returned plugin configuration information
+// from map[string]interface{} to a more specific struct
+//
+// i.e. map[string]interface -> ACLConfig
+func FromMap(configStruct interface{}, configMap map[string]interface{}) error {
 	for k, v := range configMap {
 		err := SetJSONField(configStruct, k, v)
 		if err != nil {
@@ -290,34 +296,56 @@ func FromMap(configStruct interface {}, configMap map[string]interface{}) error 
 
 // SetField is used to convert entries in a map to struct fields
 // It matches map keys to json tags
-func SetJSONField(obj interface{}, name string, value interface{}) error {
-	v := reflect.ValueOf(obj).Elem()
-	var structFieldValue reflect.Value
-	for i := 0; i < v.NumField(); i++ {
-		f := v.Type().Field(i)
+func SetJSONField(configStruct interface{}, mapKey string, mapValue interface{}) error {
+	sv := reflect.ValueOf(configStruct).Elem()
+
+	// Iterate over struct fields and match first `json:""` tag to map key
+	// It is assumed the json tags are either "tag,omitempty" or "tag"
+	var sfv reflect.Value
+	for i := 0; i < sv.NumField(); i++ {
+		f := sv.Type().Field(i)
 		jsonTags := strings.Split(f.Tag.Get("json"), ",")
-		if jsonTags[0] == name {
-			structFieldValue = v.Field(i)
+		if jsonTags[0] == mapKey {
+			sfv = sv.Field(i)
 			break
 		}
 	}
 
-	if !structFieldValue.IsValid() {
-		return fmt.Errorf("No field with json tag %s in obj", name)
+	if !sfv.IsValid() {
+		return fmt.Errorf("No field with json tag %s in configStruct", mapKey)
 	}
 
-	if !structFieldValue.CanSet() {
-		return fmt.Errorf("Cannot set %s field value", name)
+	if !sfv.CanSet() {
+		return fmt.Errorf("Cannot set %s field mapValue", mapKey)
 	}
 
-	//structFieldType := structFieldValue.Type()
-	val := reflect.ValueOf(value)
-	/*
-	if structFieldType != val.Type() {
-		return errors.New("Provided value type didn't match obj field type")
+	// TODO: Take a harder look at this problem and make sure there isn't a cleaner way to convert interface{} to struct field
+	mv := reflect.ValueOf(mapValue)
+	switch sfv.Kind() {
+	case reflect.String:
+		if mv.Kind() != reflect.String {
+			return fmt.Errorf("Provided mapValue type didn't match configStruct field type. Got %v, want %v", mv.Type(), sfv.Type())
+		}
+		sfv.Set(mv)
+	case reflect.Int:
+		if mv.Kind() != reflect.Float64 {
+			return fmt.Errorf("Provided mapValue type didn't match configStruct field type. Got %v, want %v", mv.Type(), sfv.Type())
+		}
+		sfv.Set(reflect.ValueOf(int(mv.Float())))
+	case reflect.Slice:
+		var s []string
+		for _, v := range mv.Interface().([]interface{}) {
+			val, ok := v.(string)
+			if !ok {
+				return errors.New("Provided mapValue type didn't match configStruct field type. Need []string")
+			}
+			s = append(s, val)
+		}
+		sfv.Set(reflect.ValueOf(s))
+	default:
+		return errors.New("Provided mapValue type was not expected. mapValue can only be of types string, int, []string")
 	}
-	*/
-	structFieldValue.Set(val)
+
 	return nil
 }
 

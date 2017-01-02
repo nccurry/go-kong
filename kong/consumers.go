@@ -146,4 +146,3 @@ func (s *ConsumersService) GetAll(opt *ConsumersGetAllOptions) (*Consumers, *htt
 
 	return consumers, resp, err
 }
-

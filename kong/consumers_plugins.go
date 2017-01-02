@@ -1,23 +1,22 @@
 package kong
 
 import (
-	"net/http"
 	"fmt"
+	"net/http"
 )
 
 type ConsumersACLService service
 
 type ACLConsumerConfigs struct {
-	Data []ACLConsumerConfig `json:"data,omitempty"`
-	Total int `json:"total,omitempty"`
+	Data  []ACLConsumerConfig `json:"data,omitempty"`
+	Total int                 `json:"total,omitempty"`
 }
 
 type ACLConsumerConfig struct {
 	ConsumerID string `json:"consumer_id,omitempty"`
-	CreatedAt int `json:"created_at,omitempty"`
-	Group string `json:"group,omitempty"`
-	ID string `json:"id,omitempty"`
-
+	CreatedAt  int    `json:"created_at,omitempty"`
+	Group      string `json:"group,omitempty"`
+	ID         string `json:"id,omitempty"`
 }
 
 func (s *ConsumersACLService) Configure(consumer string, config *ACLConsumerConfig) (*http.Response, error) {
