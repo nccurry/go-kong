@@ -7,6 +7,27 @@
 
 go-kong is a Go client library for accessing Mashape's [Kong API](https://getkong.org/docs/0.9.x/admin-api/).
 
+## Table of Contents ##
+
+* [Install](#install)
+* [Usage](#usage)
+* [Apis](#apis)  
+    * [Methods](#apis-methods)
+    * [Structure Definitions](#apis-structure-definitions)
+* [Consumers](#consumers)
+    * [Methods](#consumers-methods)
+    * [Structure Definitions](#consumers-structure-definitions)
+* [Plugins](#plugins)
+    * [Methods](#plugins-methods)
+    * [Structure Definitions](#plugins-structure-definitions)
+* [Consumer Plugins](#plugins)
+    * [Methods](#consumer-plugins-methods)
+    * [Structure Definitions](#consumer-plugins-structure-definitions)
+* [Handling Errors](#handling-errors)
+* [Filtering with Query Parameters](#filtering-with-query-parameters)
+* [Working with Plugin Definitions](#working-with-plugin-definitions)
+* [To-Do](#to-do)
+
 ## Install ##
 
 ```bash
@@ -74,25 +95,6 @@ func main() {
     }
 }
 ```
-
-## Table of Contents ##
-
-* [Apis](#apis)  
-    * [Methods](#apis-methods)
-    * [Structure Definitions](#apis-struct-defs)
-* [Consumers](#consumers)
-    * [Methods](#consumers-methods)
-    * [Structure Definitions](#consumers-struct-defs)
-* [Plugins](#plugins)
-    * [Methods](#plugins-methods)
-    * [Structure Definitions](#plugins-struct-defs)
-* [Consumer Plugins](#plugins)
-    * [Methods](#consumer-plugins-methods)
-    * [Structure Definitions](#consumer-plugins-struct-defs)
-* [Handling Errors](#handling-errors)
-* [Filtering with Query Parameters](#filtering-with-query-parameters)
-* [Working with Plugin Definitions](#working-with-plugin-defs)
-* [To-Do](#to-do)
 
 ## Apis ##
 
