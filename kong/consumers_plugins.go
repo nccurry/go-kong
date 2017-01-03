@@ -73,15 +73,15 @@ func (s *ConsumersACLService) Delete(consumer, id string) (*http.Response, error
 type ConsumersJWTService service
 
 type ConsumerJWTConfigs struct {
-	Data []ConsumerJWTConfig `json:"data,omitempty"`
-	Total int `json:"total,omitemtpy"`
+	Data  []ConsumerJWTConfig `json:"data,omitempty"`
+	Total int                 `json:"total,omitemtpy"`
 }
 
 type ConsumerJWTConfig struct {
-	Key string `json:"key,omitempty"`
-	Algorithm string `json:"algorithm,omitempty"`
+	Key          string `json:"key,omitempty"`
+	Algorithm    string `json:"algorithm,omitempty"`
 	RSAPublicKey string `json:"rsa_public_key,omitempty"`
-	Secret string `json:"secret,omitempty"`
+	Secret       string `json:"secret,omitempty"`
 }
 
 func (s *ConsumersJWTService) Post(consumer string, config *ConsumerJWTConfig) (*http.Response, error) {
