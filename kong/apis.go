@@ -112,6 +112,40 @@ func (s *ApisService) Post(api *Api) (*http.Response, error) {
 	return resp, err
 }
 
+// ApisService.PostPlugin creates a new Kong plugin object attached to the
+// specified api.
+//
+// Equivalent to POST /apis/{apiName}/plugins
+func (s *ApisService) PostPlugin(api string, plugin *Plugin) (*http.Response, error) {
+	u := fmt.Sprintf("apis/%v/plugins", api)
+
+	req, err := s.client.NewRequest("POST", u, plugin)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := s.client.Do(req, nil)
+
+	return resp, err
+}
+
+// ApisService.PatchPlugin modifies the configuration of the specified plugin object attached
+// to the specified api. plugin.ID must be provided.
+//
+// Equivalent to PATCH /apis/{apiName}/plugins/{pluginID}
+func (s *ApisService) PatchPlugin(api string, plugin *Plugin) (*http.Response, error) {
+	u := fmt.Sprintf("apis/%v/plugins/%v", api, plugin.ID)
+
+	req, err := s.client.NewRequest("PATCH", u, plugin)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := s.client.Do(req, nil)
+
+	return resp, err
+}
+
 // ApisGetAllOptions specifies optional filter parameters to the
 // ApisService.GetAll method.
 //

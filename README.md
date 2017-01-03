@@ -17,6 +17,7 @@ go-kong is a Go client library for accessing Mashape's [Kong API](https://getkon
     * [Apis](#apis)  
     * [Consumers](#consumers)
     * [Plugins](#plugins)
+    * [Consumers Plugins](#consumers-plugins)
 * [Handling Errors](#handling-errors)
 * [Filtering with Query Parameters](#filtering-with-query-parameters)
 * [Working with Plugin Definitions](#working-with-plugin-definitions)
@@ -77,7 +78,7 @@ func main() {
     }
     
     // Add ACL group to consumer
-    aclConsumerConfig := &kong.ACLConsumerConfig{Group: "users"}
+    aclConsumerConfig := &kong.ConsumerACLConfig{Group: "users"}
     consumerName := "paul.atreides"
     _, err = client.Consumers.ACL.Configure(consumerName, aclConsumerConfig)
     
@@ -233,7 +234,6 @@ type Consumers struct {
 	Next  string     `json:"next,omitempty"`
 }
 
-// Consumer represents a single Kong consumer object
 type Consumer struct {
 	ID        string `json:"id,omitempty"`
 	Username  string `json:"username,omitempty"`
@@ -252,29 +252,99 @@ type ConsumersGetAllOptions struct {
 
 #### Plugins ####
 
+Because of the generic nature of Kong's plugin object, the Config field of
+the Plugin struct is defined as follows:
 ```go
-// GET /plugins
-
-// GET /plugins?size=15&mapKey=acl
-
-// GET /plugins/4def15f5-0697-4956-a2b0-9ae079b686bb
-
-// GET /plugins/enabled
-
-// GET /plugins/schema/acl
-
-// POST /plugins
-
-// PATCH /plugins
-
-// DELETE /plugins/4def15f5-0697-4956-a2b0-9ae079b686bb
+type Plugin struct {
+    ...
+    Config map[string]interface{} `json:"config,omitempty"`
+    ...
+}
 ```
 
-## Consumer Plugins ##
+All of the various Kong plugin configurations have (eventually)
+been defined. Two helper functions have been written to help marshal plugin configurations to/from 
+more specific configuration structs to the more generic ```map[string]interface{}```
 
-#### Consumer Plugins Methods ####
+For example:
+```go
+// Convert struct to map[string]interface{} expected by kong.Plugin
+aclConfig := &kong.ACLConfig{Whitelist: []string{"users", "admins"}, Blacklist: []string{"blocked"}}
+plugin := &kong.Plugin{Name: "acl", Config: kong.ToMap(aclConfig)}
 
-#### Consumer Plugins Structure Definitions ####
+// Convert map[string]interface{} returned by client.Plugins.Get to struct
+plugin, _, _ := client.Plugins.Get(id)
+aclConfig := new(ACLConfig)
+err := kong.FromMap(aclConfig, plugin.Config)
+```
+
+
+
+```go
+// GET /plugins
+plugins, resp, err := client.Plugins.GetAll(nil)
+
+// GET /plugins?size=15&consumer_id=4def15f5-0697-4956-a2b0-9ae079b686bb
+opt := &kong.PluginsGetAllOptions{Size: 15, ConsumerID: "4def15f5-0697-4956-a2b0-9ae079b686bb"}
+plugins, resp, err := client.Plugins.GetAll(opt)
+
+// GET /plugins/4def15f5-0697-4956-a2b0-9ae079b686bb
+plugin, resp, err := client.Plugins.Get("4def15f5-0697-4956-a2b0-9ae079b686bb")
+
+// GET /plugins/enabled
+enabled, resp, err := client.Plugins.GetEnabled()
+
+// GET /plugins/schema/acl
+schema, resp, err := client.Plugins.GetSchema("acl")
+
+// POST /plugins
+aclConfig := &kong.ACLConfig{Whitelist: []string{"users", "admins"}, Blacklist: []string{"blocked"}}
+plugin := &kong.Plugin{Name: "acl", Config: kong.ToMap(aclConfig)}
+resp, err := client.Plugins.Post(plugin)
+
+// PATCH /plugins
+aclConfig := &kong.ACLConfig{Whitelist: []string{"users", "admins"}, Blacklist: []string{"blocked"}}
+plugin := &kong.Plugin{Name: "acl", Config: kong.ToMap(aclConfig)}
+resp, err := client.Plugins.Patch(plugin)
+
+// DELETE /plugins/4def15f5-0697-4956-a2b0-9ae079b686bb
+resp, err := client.Plugins.Delete("4def15f5-0697-4956-a2b0-9ae079b686bb")
+```
+
+```go
+type Plugins struct {
+	Data  []Plugin `json:"data,omitempty"`
+	Total int      `json:"total,omitempty"`
+	Next  string   `json:"next,omitempty"`
+}
+
+type Plugin struct {
+	ID         string                 `json:"id,omitempty"`
+	Name       string                 `json:"name,omitempty"`
+	CreatedAt  int                    `json:"created_at,omitempty"`
+	Enabled    bool                   `json:"enabled,omitempty"`
+	ApiID      string                 `json:"api_id,omitempty"`
+	ConsumerID string                 `json:"consumer_id,omitempty"`
+	Config     map[string]interface{} `json:"config,omitempty"`
+}
+
+type PluginsGetAllOptions struct {
+	ID         string `url:"id,omitempty"`          // A filter on the list based on the id field.
+	Name       string `url:"name,omitempty"`        // A filter on the list based on the name field.
+	ApiID      string `url:"api_id,omitempty"`      // A filter on the list based on the api_id field.
+	ConsumerID string `url:"consumer_id,omitempty"` // A filter on the list based on the consumer_id field.
+	Size       int    `url:"size,omitempty"`        // A limit on the number of objects to be returned.
+	Offset     string `url:"offset,omitempty"`      // A cursor used for pagination. offset is an object identifier that defines a place in the list.
+
+}
+```
+In addition to the generic plugin struct definitions, there are many more structures defined for each plugin
+configuration in [plugins.go](kong/plugins.go)
+
+#### Consumers Plugins ####
+
+```go
+```
 
 ## Handling Errors ##
 
@@ -287,4 +357,3 @@ type ConsumersGetAllOptions struct {
 * Fuller Unit-testing
 * Represent all plugin object configs via structs
 * Represent all consumer plugin configs via structs
-* Write services for node ('/', '/status') and cluster (/cluster) APIs

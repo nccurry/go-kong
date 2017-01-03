@@ -9,7 +9,7 @@ import (
 // ConsumersService handles communication with Kong's '/consumers' resource.
 type ConsumersService struct {
 	*service
-	ACL *ConsumersACLService
+	Plugins *ConsumersPlugins
 }
 
 // Consumers represents the object returned from Kong when querying for multiple consumer objects.
