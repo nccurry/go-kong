@@ -36,6 +36,8 @@ type Client struct {
 	common service
 
 	// Services used for talking to different parts of the Kong API
+	Node      *NodeService
+	Cluster   *ClusterService
 	Apis      *ApisService
 	Consumers *ConsumersService
 	Plugins   *PluginsService
@@ -92,8 +94,21 @@ func NewClient(httpClient *http.Client, baseURLStr string) (*Client, error) {
 
 	c := &Client{client: httpClient, BaseURL: baseURL}
 	c.common.client = c
-	c.Apis = (*ApisService)(&c.common)
-	c.Consumers = &ConsumersService{&c.common, (*ConsumersACLService)(&c.common)}
+
+	// Share a single client among all of the services
+	c.Node = (*NodeService)(&c.common)
+	c.Cluster = (*ClusterService)(&c.common)
+	c.Apis = &ApisService{
+		service: &c.common,
+		Plugins: (*ApisPluginsService)(&c.common),
+	}
+	c.Consumers = &ConsumersService{
+		service: &c.common,
+		Plugins: &ConsumersPlugins{
+			ACL: (*ConsumersACLService)(&c.common),
+			JWT: (*ConsumersJWTService)(&c.common),
+		},
+	}
 	c.Plugins = (*PluginsService)(&c.common)
 
 	return c, nil

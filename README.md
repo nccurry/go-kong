@@ -80,7 +80,7 @@ func main() {
     // Add ACL group to consumer
     aclConsumerConfig := &kong.ConsumerACLConfig{Group: "users"}
     consumerName := "paul.atreides"
-    _, err = client.Consumers.ACL.Configure(consumerName, aclConsumerConfig)
+    _, err = client.Consumers.Plugins.ACL.Post(consumerName, aclConsumerConfig)
     
     // Handle 404 separately
     if ok := err.(kong.NotFoundError); ok {

@@ -7,7 +7,10 @@ import (
 )
 
 // ApisService handles communication with Kong's '/apis' resource.
-type ApisService service
+type ApisService struct {
+	*service
+	Plugins *ApisPluginsService
+}
 
 // Apis represents the object returned from Kong when querying for
 // multiple api objects.
@@ -33,7 +36,7 @@ type Api struct {
 	Name             string `json:"name,omitempty"`
 }
 
-// ApisService.Get queries for a single Kong api object, by name or id.
+// Get queries for a single Kong api object, by name or id.
 //
 // Equivalent to GET /apis/{name or id}
 func (s *ApisService) Get(api string) (*Api, *http.Response, error) {
@@ -53,7 +56,7 @@ func (s *ApisService) Get(api string) (*Api, *http.Response, error) {
 	return uResp, resp, err
 }
 
-// ApisService.Patch updates an existing Kong api object.
+// Patch updates an existing Kong api object.
 // At least one of api.Name or api.ID must be specified in
 // the passed *Api parameter.
 //
@@ -79,7 +82,7 @@ func (s *ApisService) Patch(api *Api) (*http.Response, error) {
 
 }
 
-// ApisService.Delete deletes a single Kong api object, by name or id.
+// Delete deletes a single Kong api object, by name or id.
 //
 // Equivalent to DELETE /apis/{name or id}
 func (s *ApisService) Delete(api string) (*http.Response, error) {
@@ -98,45 +101,11 @@ func (s *ApisService) Delete(api string) (*http.Response, error) {
 	return resp, err
 }
 
-// ApisService.Post creates a new Kong api object.
+// Post creates a new Kong api object.
 //
 // Equivalent to POST /apis
 func (s *ApisService) Post(api *Api) (*http.Response, error) {
 	req, err := s.client.NewRequest("POST", "apis", api)
-	if err != nil {
-		return nil, err
-	}
-
-	resp, err := s.client.Do(req, nil)
-
-	return resp, err
-}
-
-// ApisService.PostPlugin creates a new Kong plugin object attached to the
-// specified api.
-//
-// Equivalent to POST /apis/{apiName}/plugins
-func (s *ApisService) PostPlugin(api string, plugin *Plugin) (*http.Response, error) {
-	u := fmt.Sprintf("apis/%v/plugins", api)
-
-	req, err := s.client.NewRequest("POST", u, plugin)
-	if err != nil {
-		return nil, err
-	}
-
-	resp, err := s.client.Do(req, nil)
-
-	return resp, err
-}
-
-// ApisService.PatchPlugin modifies the configuration of the specified plugin object attached
-// to the specified api. plugin.ID must be provided.
-//
-// Equivalent to PATCH /apis/{apiName}/plugins/{pluginID}
-func (s *ApisService) PatchPlugin(api string, plugin *Plugin) (*http.Response, error) {
-	u := fmt.Sprintf("apis/%v/plugins/%v", api, plugin.ID)
-
-	req, err := s.client.NewRequest("PATCH", u, plugin)
 	if err != nil {
 		return nil, err
 	}
@@ -162,7 +131,7 @@ type ApisGetAllOptions struct {
 	Offset      string `url:"offset,omitempty"`       // A cursor used for pagination. offset is an object identifier that defines a place in the list.
 }
 
-// ApisService.GetAll queries for all Kong api objects.
+// GetAll queries for all Kong api objects.
 // This query can be filtered by supplying the ApisGetAllOptions struct.
 //
 // Equivalent to GET /apis?uri=params&from=opt
@@ -184,4 +153,65 @@ func (s *ApisService) GetAll(opt *ApisGetAllOptions) (*Apis, *http.Response, err
 	}
 
 	return apis, resp, err
+}
+
+// ApisPluginsService handles communication with Kong's '/apis/{api id or name}/plugins' resource.
+type ApisPluginsService service
+
+// GetAll lists all plugins attached to the specifed api.
+// This query can be filtered by supplying the PluginsGetAllOptions struct.
+//
+// Equivalent to GET/apis/{api}/plugins?uri=params&from=opt
+func (s *ApisPluginsService) GetAll(api string, opt *PluginsGetAllOptions) (*Plugins, *http.Response, error) {
+	u, err := addOptions(fmt.Sprintf("apis/%v/plugins", api), opt)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	req, err := s.client.NewRequest("GET", u, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	plugins := new(Plugins)
+	resp, err := s.client.Do(req, plugins)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return plugins, resp, err
+}
+
+// Post creates a new Kong plugin object attached to the
+// specified api.
+//
+// Equivalent to POST /apis/{apiName}/plugins
+func (s *ApisPluginsService) Post(api string, plugin *Plugin) (*http.Response, error) {
+	u := fmt.Sprintf("apis/%v/plugins", api)
+
+	req, err := s.client.NewRequest("POST", u, plugin)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := s.client.Do(req, nil)
+
+	return resp, err
+}
+
+// Patch modifies the configuration of the specified plugin object attached
+// to the specified api. plugin.ID must be provided.
+//
+// Equivalent to PATCH /apis/{apiName}/plugins/{pluginID}
+func (s *ApisPluginsService) Patch(api string, plugin *Plugin) (*http.Response, error) {
+	u := fmt.Sprintf("apis/%v/plugins/%v", api, plugin.ID)
+
+	req, err := s.client.NewRequest("PATCH", u, plugin)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := s.client.Do(req, nil)
+
+	return resp, err
 }
