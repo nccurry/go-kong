@@ -9,26 +9,20 @@ go-kong is a Go client library for accessing Mashape's [Kong API](https://getkon
 
 ## Table of Contents ##
 
-* [Install](#install)
+* [Installation](#installation)
 * [Usage](#usage)
-* [Apis](#apis)  
-    * [Methods](#apis-methods)
-    * [Structure Definitions](#apis-structure-definitions)
-* [Consumers](#consumers)
-    * [Methods](#consumers-methods)
-    * [Structure Definitions](#consumers-structure-definitions)
-* [Plugins](#plugins)
-    * [Methods](#plugins-methods)
-    * [Structure Definitions](#plugins-structure-definitions)
-* [Consumer Plugins](#plugins)
-    * [Methods](#consumer-plugins-methods)
-    * [Structure Definitions](#consumer-plugins-structure-definitions)
+* [Client Objects](#client-objects)
+    * [Node](#node)
+    * [Cluster](*cluster)
+    * [Apis](#apis)  
+    * [Consumers](#consumers)
+    * [Plugins](#plugins)
 * [Handling Errors](#handling-errors)
 * [Filtering with Query Parameters](#filtering-with-query-parameters)
 * [Working with Plugin Definitions](#working-with-plugin-definitions)
 * [To-Do](#to-do)
 
-## Install ##
+## Installation ##
 
 ```bash
 go get "github.com/spicyusername/go-kong/kong"
@@ -96,9 +90,65 @@ func main() {
 }
 ```
 
-## Apis ##
+## Client Objects ##
 
-#### Apis Methods ####
+#### Node ####
+
+```go
+// GET /
+node, resp, err := client.Node.Get()
+
+// GET /status
+status, resp, err := client.Node.GetStatus()
+```
+
+```go
+type Node struct {
+	Configuration map[string]interface{} `json:"configuration,omitempty"`
+	Hostname string `json:"hostname,omitempty"`
+	LuaVersion string `json:"lua_version,omitempty"`
+	Plugins struct{
+		AvailableOnServer map[string]bool `json:"available_on_server,omitempty"`
+		EnabledInCluster map[string]bool `json:"enabled_in_cluster,omitempty"`
+	} `json:"plugins,omitempty"`
+	PRNGSeeds map[string]int `json:"prng_seeds,omitempty"`
+	Tagline string `json:"tagline,omitempty"`
+	Timers map[string]int `json:"timers,omitempty"`
+	Version string `json:"version,omitempty"`
+}
+
+type Status struct {
+	Database map[string]int `json:"database,omitempty"`
+	Server map[string]int `json:"server,omitempty"`
+}
+```
+
+#### Cluster ####
+
+```go
+// GET /cluster
+cluster, resp, err := client.Cluster.Get()
+
+// DELETE /cluster
+cluster := &kong.Cluster{Name: "clusternode01"}
+resp, err := client.Cluster.Delete(cluster)
+```
+
+```go
+type Cluster struct {
+	Total int `json:"total,omitemtpy"`
+	Data []ClusterMember `json:"data,omitempty"`
+}
+
+type ClusterMember struct {
+	Address string `json:"address,omitempty"`
+	Name string `json:"name,omitempty"`
+	Status string `json:"status,omitempty"`
+}
+```
+
+#### Apis ####
+
 ```go
 // GET /apis
 apis, resp, err := client.Apis.GetAll(nil)
@@ -122,7 +172,6 @@ resp, err := client.Apis.Patch(api)
 resp, err := client.Apis.Delete("myapi")
 ```
 
-#### Apis Structure Definitions ####
 ```go
 type Apis struct {
 	Data   []Api  `json:"data,omitempty"`
@@ -152,9 +201,8 @@ type ApisGetAllOptions struct {
 }
 ```
 
-## Consumers ##
+#### Consumers ####
 
-#### Consumers Methods ####
 ```go
 // GET /consumers
 consumers, resp, err := client.Consumers.GetAll(nil)
@@ -178,13 +226,32 @@ resp, err := client.Consumers.Patch(consumer)
 resp, err := client.Consumers.Delete("admin")
 ```
 
-#### Consumers Structure Definitions ####
 ```go
+type Consumers struct {
+	Data  []Consumer `json:"consumer,omitempty"`
+	Total int        `json:"total,omitempty"`
+	Next  string     `json:"next,omitempty"`
+}
+
+// Consumer represents a single Kong consumer object
+type Consumer struct {
+	ID        string `json:"id,omitempty"`
+	Username  string `json:"username,omitempty"`
+	CustomID  string `json:"custom_id,omitempty"`
+	CreatedAt int    `json:"created_at,omitempty"`
+}
+
+type ConsumersGetAllOptions struct {
+	ID       string `url:"id,omitempty"`       
+	CustomID string `url:"custom_id,omitempty"`
+	Username string `url:"username,omitempty"`  
+	Size     int    `url:"size,omitempty"`   
+	Offset   string `url:"offset,omitempty"`
+}
 ```
 
-## Plugins ##
+#### Plugins ####
 
-#### Plugins Methods ####
 ```go
 // GET /plugins
 
@@ -202,8 +269,6 @@ resp, err := client.Consumers.Delete("admin")
 
 // DELETE /plugins/4def15f5-0697-4956-a2b0-9ae079b686bb
 ```
-
-#### Plugins Structure Definitions ####
 
 ## Consumer Plugins ##
 
