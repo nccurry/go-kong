@@ -37,7 +37,7 @@ func (s *ConsumersACLService) Post(consumer string, config *ConsumerACLConfig) (
 	return resp, err
 }
 
-func (s *ConsumersACLService) Get(consumer string) (*ConsumerACLConfigs, *http.Response, error) {
+func (s *ConsumersACLService) GetAll(consumer string) (*ConsumerACLConfigs, *http.Response, error) {
 	u := fmt.Sprintf("consumers/%v/acls", consumer)
 
 	req, err := s.client.NewRequest("GET", u, nil)

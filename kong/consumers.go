@@ -18,7 +18,7 @@ type ConsumersService struct {
 // URI for the next set of results.
 // i.e. "http://localhost:8001/consumers/?size=2&offset=4d924084-1adb-40a5-c042-63b19db421d1"
 type Consumers struct {
-	Data  []Consumer `json:"consumer,omitempty"`
+	Data  []Consumer `json:"data,omitempty"`
 	Total int        `json:"total,omitempty"`
 	Next  string     `json:"next,omitempty"`
 }
@@ -138,11 +138,11 @@ func (s *ConsumersService) GetAll(opt *ConsumersGetAllOptions) (*Consumers, *htt
 		return nil, nil, err
 	}
 
-	consumers := new(Consumers)
-	resp, err := s.client.Do(req, consumers)
+	uResp := new(Consumers)
+	resp, err := s.client.Do(req, uResp)
 	if err != nil {
 		return nil, resp, err
 	}
 
-	return consumers, resp, err
+	return uResp, resp, err
 }

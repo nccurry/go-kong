@@ -140,21 +140,6 @@ func (s *PluginsService) Post(plugin *Plugin) (*http.Response, error) {
 	return resp, err
 }
 
-// PluginsService.PostToApi creates a new Kong plugin object attached
-// to a specific Api object.
-func (s *PluginsService) PostToApi(plugin *Plugin, api string) (*http.Response, error) {
-	u := fmt.Sprintf("apis/%v/plugins", api)
-
-	req, err := s.client.NewRequest("POST", u, plugin)
-	if err != nil {
-		return nil, err
-	}
-
-	resp, err := s.client.Do(req, nil)
-
-	return resp, err
-}
-
 // PluginsGetAllOptions specifies optional filter parameters
 // to the PluginsService.GetAll method.
 //
