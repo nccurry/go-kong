@@ -105,8 +105,9 @@ func NewClient(httpClient *http.Client, baseURLStr string) (*Client, error) {
 	c.Consumers = &ConsumersService{
 		service: &c.common,
 		Plugins: &ConsumersPlugins{
-			ACL: (*ConsumersACLService)(&c.common),
-			JWT: (*ConsumersJWTService)(&c.common),
+			ACL:     (*ConsumersACLService)(&c.common),
+			JWT:     (*ConsumersJWTService)(&c.common),
+			KeyAuth: (*ConsumersKeyAuthService)(&c.common),
 		},
 	}
 	c.Plugins = (*PluginsService)(&c.common)
@@ -128,6 +129,13 @@ func (c *Client) NewRequest(method, urlStr string, body interface{}) (*http.Requ
 	}
 
 	u := c.BaseURL.ResolveReference(rel)
+
+	// Kong does not like empty bodies
+	if method == "POST" || method == "PATCH" {
+		if body == nil {
+			body = struct{}{}
+		}
+	}
 
 	var buf io.ReadWriter
 	if body != nil {
