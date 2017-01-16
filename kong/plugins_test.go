@@ -199,7 +199,7 @@ func TestPluginsService_Post_badStatusCode(t *testing.T) {
 
 	_, err := client.Plugins.Post(input)
 	if err == nil {
-		t.Error("Expected error to be returned")
+		t.Error("Expected error to be returned.")
 	}
 }
 
