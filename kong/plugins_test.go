@@ -207,7 +207,7 @@ func TestPluginsService_GetAll(t *testing.T) {
 	stubSetup()
 	defer stubTeardown()
 
-	v := &Plugins{Total: 1, Next: "n", Data: []Plugin{{ID: "i"}}}
+	v := &Plugins{Total: 1, Next: "n", Data: []*Plugin{{ID: "i"}}}
 
 	mux.HandleFunc("/plugins", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
@@ -221,7 +221,7 @@ func TestPluginsService_GetAll(t *testing.T) {
 		t.Errorf("Plugins.GetAll returned error: %v", err)
 	}
 
-	want := &Plugins{Total: 1, Next: "n", Data: []Plugin{{ID: "i"}}}
+	want := &Plugins{Total: 1, Next: "n", Data: []*Plugin{{ID: "i"}}}
 	if !reflect.DeepEqual(plugins, want) {
 		t.Errorf("Plugins.GetAll returned %+v, want %+v", plugins, want)
 	}

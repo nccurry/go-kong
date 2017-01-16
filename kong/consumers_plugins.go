@@ -14,8 +14,8 @@ type ConsumersPlugins struct {
 type ConsumersACLService service
 
 type ConsumerACLConfigs struct {
-	Data  []ConsumerACLConfig `json:"data,omitempty"`
-	Total int                 `json:"total,omitempty"`
+	Data  []*ConsumerACLConfig `json:"data,omitempty"`
+	Total int                  `json:"total,omitempty"`
 }
 
 type ConsumerACLConfig struct {
@@ -74,8 +74,8 @@ func (s *ConsumersACLService) Delete(consumer, id string) (*http.Response, error
 type ConsumersJWTService service
 
 type ConsumerJWTConfigs struct {
-	Data  []ConsumerJWTConfig `json:"data,omitempty"`
-	Total int                 `json:"total,omitemtpy"`
+	Data  []*ConsumerJWTConfig `json:"data,omitempty"`
+	Total int                  `json:"total,omitemtpy"`
 }
 
 type ConsumerJWTConfig struct {
@@ -92,7 +92,7 @@ func (s *ConsumersJWTService) Post(consumer string, config *ConsumerJWTConfig) (
 
 	req, err := s.client.NewRequest("POST", u, config)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	uResp := new(ConsumerJWTConfig)
@@ -137,8 +137,8 @@ func (s *ConsumersJWTService) Delete(consumer, id string) (*http.Response, error
 type ConsumersKeyAuthService service
 
 type ConsumerKeyAuthConfigs struct {
-	Data  []ConsumerJWTConfig `json:"data,omitempty"`
-	Total int                 `json:"total,omitemtpy"`
+	Data  []*ConsumerKeyAuthConfig `json:"data,omitempty"`
+	Total int                      `json:"total,omitemtpy"`
 }
 
 type ConsumerKeyAuthConfig struct {
@@ -153,7 +153,7 @@ func (s *ConsumersKeyAuthService) Post(consumer string, config *ConsumerKeyAuthC
 
 	req, err := s.client.NewRequest("POST", u, config)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	uResp := new(ConsumerKeyAuthConfig)

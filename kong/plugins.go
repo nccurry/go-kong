@@ -19,9 +19,9 @@ type PluginsService service
 // Next holds the URI for the next set of results.
 // i.e. "http://localhost:8001/plugins?size=2&offset=4d924084-1adb-40a5-c042-63b19db421d1"
 type Plugins struct {
-	Data  []Plugin `json:"data,omitempty"`
-	Total int      `json:"total,omitempty"`
-	Next  string   `json:"next,omitempty"`
+	Data  []*Plugin `json:"data,omitempty"`
+	Total int       `json:"total,omitempty"`
+	Next  string    `json:"next,omitempty"`
 }
 
 // Plugin represents a single Kong plugin object.

@@ -228,7 +228,7 @@ func TestApisService_GetAll(t *testing.T) {
 	stubSetup()
 	defer stubTeardown()
 
-	v := &Apis{Total: 1, Next: "n", Data: []Api{{ID: "i"}}}
+	v := &Apis{Total: 1, Next: "n", Data: []*Api{{ID: "i"}}}
 
 	mux.HandleFunc("/apis", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
@@ -242,7 +242,7 @@ func TestApisService_GetAll(t *testing.T) {
 		t.Errorf("Apis.GetAll returned error: %v", err)
 	}
 
-	want := &Apis{Total: 1, Next: "n", Data: []Api{{ID: "i"}}}
+	want := &Apis{Total: 1, Next: "n", Data: []*Api{{ID: "i"}}}
 	if !reflect.DeepEqual(apis, want) {
 		t.Errorf("Apis.GetAll returned %+v, want %+v", apis, want)
 	}

@@ -203,7 +203,7 @@ func TestConsumersService_GetAll(t *testing.T) {
 	stubSetup()
 	defer stubTeardown()
 
-	v := &Consumers{Total: 1, Next: "n", Data: []Consumer{{ID: "i"}}}
+	v := &Consumers{Total: 1, Next: "n", Data: []*Consumer{{ID: "i"}}}
 
 	mux.HandleFunc("/consumers", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
@@ -217,7 +217,7 @@ func TestConsumersService_GetAll(t *testing.T) {
 		t.Errorf("Consumers.GetAll returned error: %v", err)
 	}
 
-	want := &Consumers{Total: 1, Next: "n", Data: []Consumer{{ID: "i"}}}
+	want := &Consumers{Total: 1, Next: "n", Data: []*Consumer{{ID: "i"}}}
 	if !reflect.DeepEqual(consumers, want) {
 		t.Errorf("Apis.GetAll returned %+v, want %+v", consumers, want)
 	}

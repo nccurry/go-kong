@@ -132,7 +132,7 @@ func (c *Client) NewRequest(method, urlStr string, body interface{}) (*http.Requ
 
 	// Kong does not like empty bodies
 	if method == "POST" || method == "PATCH" {
-		if body == nil {
+		if reflect.ValueOf(body).IsNil() {
 			body = struct{}{}
 		}
 	}

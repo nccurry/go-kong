@@ -19,7 +19,7 @@ type ApisService struct {
 // Next holds the URI for the next set of results.
 // i.e. "http://localhost:8001/apis/?size=2&offset=4d924084-1adb-40a5-c042-63b19db421d1"
 type Apis struct {
-	Data   []Api  `json:"data,omitempty"`
+	Data   []*Api `json:"data,omitempty"`
 	Total  int    `json:"total,omitempty"`
 	Next   string `json:"next,omitempty"`
 	Offset string `json:"offset,omitempty"`
