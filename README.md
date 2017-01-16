@@ -2,7 +2,7 @@
 
 [![GoDoc](https://godoc.org/github.com/nccurry/go-kong/kong?status.svg)](https://godoc.org/github.com/nccurry/go-kong/kong) 
 [![Build Status](https://travis-ci.org/nccurry/go-kong.svg?branch=master)](https://travis-ci.org/nccurry/go-kong) 
-[![Coverage Status](https://coveralls.io/repos/github/ncurry/go-kong/badge.svg?branch=master)](https://coveralls.io/github/nccurry/go-kong?branch=master) 
+[![Coverage Status](https://coveralls.io/repos/github/nccurry/go-kong/badge.svg?branch=master)](https://coveralls.io/github/nccurry/go-kong?branch=master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/nccurry/go-kong)](https://goreportcard.com/report/github.com/nccurry/go-kong) 
 
 go-kong is a Go client library for accessing Mashape's [Kong API](https://getkong.org/docs/0.9.x/admin-api/).
