@@ -131,21 +131,21 @@ status, resp, err := client.Node.GetStatus()
 ```go
 type Node struct {
 	Configuration map[string]interface{} `json:"configuration,omitempty"`
-	Hostname string `json:"hostname,omitempty"`
-	LuaVersion string `json:"lua_version,omitempty"`
-	Plugins struct{
+	Hostname      string                 `json:"hostname,omitempty"`
+	LuaVersion    string                 `json:"lua_version,omitempty"`
+	Plugins       struct {
 		AvailableOnServer map[string]bool `json:"available_on_server,omitempty"`
-		EnabledInCluster map[string]bool `json:"enabled_in_cluster,omitempty"`
+		EnabledInCluster  map[string]bool `json:"enabled_in_cluster,omitempty"`
 	} `json:"plugins,omitempty"`
 	PRNGSeeds map[string]int `json:"prng_seeds,omitempty"`
-	Tagline string `json:"tagline,omitempty"`
-	Timers map[string]int `json:"timers,omitempty"`
-	Version string `json:"version,omitempty"`
+	Tagline   string         `json:"tagline,omitempty"`
+	Timers    map[string]int `json:"timers,omitempty"`
+	Version   string         `json:"version,omitempty"`
 }
 
 type Status struct {
 	Database map[string]int `json:"database,omitempty"`
-	Server map[string]int `json:"server,omitempty"`
+	Server   map[string]int `json:"server,omitempty"`
 }
 ```
 
@@ -162,14 +162,14 @@ resp, err := client.Cluster.Delete(cluster)
 
 ```go
 type Cluster struct {
-	Total int `json:"total,omitemtpy"`
-	Data []ClusterMember `json:"data,omitempty"`
+	Total int             `json:"total,omitemtpy"`
+	Data  []ClusterMember `json:"data,omitempty"`
 }
 
 type ClusterMember struct {
 	Address string `json:"address,omitempty"`
-	Name string `json:"name,omitempty"`
-	Status string `json:"status,omitempty"`
+	Name    string `json:"name,omitempty"`
+	Status  string `json:"status,omitempty"`
 }
 ```
 
