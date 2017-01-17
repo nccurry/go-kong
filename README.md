@@ -41,23 +41,29 @@ package main
 
 import (
         "log"
-        "github.com/spicyusername/go-kong/kong"
+        "github.com/nccurry/go-kong/kong"
 )
 
 func main() {
     // Create new client
     client, _ := kong.NewClient(nil, "http://localhost:8001/")
     
+    // Get cluster information
+    cluster, _, _ := client.Cluster.Get()
+    
+    // Get Node information
+    node , _, _ := client.Node.Get()
+    status, _, _ := client.Node.GetStatus()
+    
     // Get information about the 'backend' api
     api, _, _ := client.Apis.Get("backend")
-    log.Println(api.ID)
 
-    // Create a new api called 'middletier'
-    mtApi := &kong.Api{Name: "middletier", RequestPath: "/mt/v0", UpstreamURL: "http://mt.my.org:8080"}
+    // Create a new api called 'mt'
+    mtApi := &kong.Api{Name: "mt", RequestPath: "/mt/v0", UpstreamURL: "http://mt.my.org:8080"}
     _, err := client.Apis.Post(mtApi)
     
     // Handle 409 error separately
-    if ok := err.(kong.ConflictError); ok {
+    if _, ok := err.(kong.ConflictError); ok {
         log.Printf("Endpoint with name %s already exists.", mtApi.Name)
     } else if err != nil {
         log.Fatal(err)
@@ -69,7 +75,7 @@ func main() {
         log.Println(v.Username)
     }
 
-    // Apply ACL plugin to all all apis
+    // Apply ACL plugin to all apis
     aclConfig := &kong.ACLConfig{Whitelist: []string{"users", "admins"}, Blacklist: []string{"blocked"}}
     plugin := &kong.Plugin{Name: "acl", Config: kong.ToMap(aclConfig)}
     _, err = client.Plugins.Post(plugin)
@@ -83,11 +89,41 @@ func main() {
     _, err = client.Consumers.Plugins.ACL.Post(consumerName, aclConsumerConfig)
     
     // Handle 404 separately
-    if ok := err.(kong.NotFoundError); ok {
+    if _, ok := err.(kong.NotFoundError); ok {
         log.Printf("Could not find consumer with name %s", consumerName)
     } else if err != nil {
         log.Fatal(err)
     }
+    
+    // Get api ACL plugin information
+    opt := &kong.PluginsGetAllOptions{Name: "acl"}
+    aclApiPlugins, _, err := client.Apis.Plugins.GetAll("mt", opt)
+    if err != nil {
+        log.Fatal(err)
+    }
+    
+    // Convert plugin configuration from map[string]interface{} to specific ACLConfig type
+    aclConfig := new(kong.ACLConfig)
+    if aclApiPlugins > 0 {
+        err = kong.FromMap(aclConfig, aclApiPlugins.Data[0].Config)
+        if err != nil {
+                log.Fatal(err)
+        }
+    }
+    
+    // Get Consumer JWT plugin information
+    jwtPlugins, _, err := client.Consumers.Plugins.JWT.Get(consumerName)
+    if err != nil {
+        log.Fatal(err)
+    }
+    
+    var jwtPluginSecret, jwtPluginKey string
+    if jwtPlugins.Total > 0 {
+        jwtPluginSecret = jwtPlugins.Data[0].Secret
+        jwtPluginKey = jwtPlugins.Data[0].Key
+    }
+    
+    
 }
 ```
 
@@ -262,8 +298,8 @@ type Plugin struct {
 }
 ```
 
-All of the various Kong plugin configurations have (eventually)
-been defined. Two helper functions have been written to help marshal plugin configurations to/from 
+All of the various Kong plugin configurations will eventually 
+be defined. Two helper functions have been written to help marshal plugin configurations to/from 
 more specific configuration structs to the more generic ```map[string]interface{}```
 
 For example:
@@ -348,9 +384,76 @@ configuration in [plugins.go](kong/plugins.go)
 
 ## Handling Errors ##
 
+Every client method returns either
+```(*http.Response, error)``` or ```(*kong.Object, *http.Response, error)```
+
+The ```*http.Response``` object can be used by the caller to inspect the actual response
+object returned by kong.
+
+In cases where Kong returns a ```404``` or ```409``` the returned error will have one of 
+the associated ```kong.ErrorResponse``` types.
+```go
+type ErrorResponse struct {
+	Response    *http.Response // HTTP response that caused this error
+	KongMessage string         `json:"message,omitempty"`
+	KongError   string         `json:"error,omitempty"`
+}
+
+type ConflictError ErrorResponse //409
+type NotFoundError ErrorResponse //404
+```
+
+You can explicitly check for these cases by using type assertions on the returned error value
+```go
+aclConsumerConfig := &kong.ConsumerACLConfig{Group: "kwisatz.haderach"}
+_, err = client.Consumers.Plugins.ACL.Post("paul.atredies", aclConsumerConfig)
+if _, ok := err.(*kong.NotFoundError); ok {
+    log.Fatal("Could not find consumer paul.atredies")
+} else if err != nil {
+    log.Fatal(err)
+}
+```
+
 ## Filtering with Query Parameters ##
 
-## Working with Plugin Definitions ##
+When executing GET requests that return multiple objects the results can be filtered by
+supplying one of the following objects where appropriate.  
+The supplied struct fields will be used as query parameters.
+```go
+type ApisGetAllOptions struct {
+	ID          string `url:"id,omitempty"`           // A filter on the list based on the apis id field.
+	Name        string `url:"name,omitempty"`         // A filter on the list based on the apis name field.
+	RequestHost string `url:"request_host,omitempty"` // A filter on the list based on the apis request_host field.
+	RequestPath string `url:"request_path,omitempty"` // A filter on the list based on the apis request_path field.
+	UpstreamURL string `url:"upstream_url,omitempty"` // A filter on the list based on the apis upstream_url field.
+	Size        int    `url:"size,omitempty"`         // A limit on the number of objects to be returned.
+	Offset      string `url:"offset,omitempty"`       // A cursor used for pagination. offset is an object identifier that defines a place in the list.
+}
+
+type ConsumersGetAllOptions struct {
+	ID       string `url:"id,omitempty"`        // A filter on the list based on the consumer id field.
+	CustomID string `url:"custom_id,omitempty"` // A filter on the list based on the consumer custom_id field.
+	Username string `url:"username,omitempty"`  // A filter on the list based on the consumer username field.
+	Size     int    `url:"size,omitempty"`      // A limit on the number of objects to be returned.
+	Offset   string `url:"offset,omitempty"`    // A cursor used for pagination. offset is an object identifier that defines a place in the list.
+}
+
+type PluginsGetAllOptions struct {
+	ID         string `url:"id,omitempty"`          // A filter on the list based on the id field.
+	Name       string `url:"name,omitempty"`        // A filter on the list based on the name field.
+	ApiID      string `url:"api_id,omitempty"`      // A filter on the list based on the api_id field.
+	ConsumerID string `url:"consumer_id,omitempty"` // A filter on the list based on the consumer_id field.
+	Size       int    `url:"size,omitempty"`        // A limit on the number of objects to be returned.
+	Offset     string `url:"offset,omitempty"`      // A cursor used for pagination. offset is an object identifier that defines a place in the list.
+}
+```
+
+For example:
+```go
+// GET /consumers?username=admin&size=10
+opt := &kong.ConsumersGetAllOptions{Username: "admin", Size: 10}
+consumers, _, _ := client.Consumers.GetAll(nil)
+```
 
 ## To-Do ##
 * Finish the README.md
