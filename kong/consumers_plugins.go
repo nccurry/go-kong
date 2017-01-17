@@ -101,7 +101,7 @@ func (s *ConsumersJWTService) Post(consumer string, config *ConsumerJWTConfig) (
 	return uResp, resp, err
 }
 
-func (s *ConsumersJWTService) Get(consumer string) (*ConsumerJWTConfigs, *http.Response, error) {
+func (s *ConsumersJWTService) GetAll(consumer string) (*ConsumerJWTConfigs, *http.Response, error) {
 	u := fmt.Sprintf("consumers/%v/jwt", consumer)
 
 	req, err := s.client.NewRequest("GET", u, nil)
@@ -162,7 +162,7 @@ func (s *ConsumersKeyAuthService) Post(consumer string, config *ConsumerKeyAuthC
 	return uResp, resp, err
 }
 
-func (s *ConsumersKeyAuthService) Get(consumer string) (*ConsumerKeyAuthConfigs, *http.Response, error) {
+func (s *ConsumersKeyAuthService) GetAll(consumer string) (*ConsumerKeyAuthConfigs, *http.Response, error) {
 	u := fmt.Sprintf("consumers/%v/key-auth", consumer)
 
 	req, err := s.client.NewRequest("GET", u, nil)
