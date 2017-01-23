@@ -35,7 +35,7 @@ type Plugin struct {
 	ID         string                 `json:"id,omitempty"`
 	Name       string                 `json:"name,omitempty"`
 	CreatedAt  int                    `json:"created_at,omitempty"`
-	Enabled    bool                   `json:"enabled,omitempty"`
+	Enabled    *bool                  `json:"enabled,omitempty"`
 	ApiID      string                 `json:"api_id,omitempty"`
 	ConsumerID string                 `json:"consumer_id,omitempty"`
 	Config     map[string]interface{} `json:"config,omitempty"`
@@ -346,7 +346,7 @@ type RequestSizeLimitingConfig struct {
 type CorrelationIDConfig struct {
 	HeaderName     string `json:"header_name,omitempty"`
 	Generator      string `json:"generator,omitempty"`
-	EchoDownstream bool   `json:"echo_downstream,omitempty"`
+	EchoDownstream *bool  `json:"echo_downstream,omitempty"`
 }
 
 type RateLimitingConfig struct {
@@ -358,7 +358,7 @@ type RateLimitingConfig struct {
 	Year          int    `json:"year, omitempty"`
 	LimitBy       string `json:"limit_by,omitempty"`
 	Policy        string `json:"policy,omitempty"`
-	FaultTolerant bool   `json:"fault_tolerant,omitempty"`
+	FaultTolerant *bool  `json:"fault_tolerant,omitempty"`
 	RedisHost     string `json:"redis_host,omitempty"`
 	RedisPort     string `json:"redis_port,omitempty"`
 	RedisPassword string `json:"redis_password,omitempty"`
@@ -369,7 +369,7 @@ type JWTConfig struct {
 	URIParamNames  []string `json:"uri_param_names,omitempty"`
 	ClaimsToVerify []string `json:"claims_to_verify,omitempty"`
 	KeyClaimName   string   `json:"key_claim_name,omitempty"`
-	SecretIsBase64 bool     `json:"secret_is_base64,omitempty"`
+	SecretIsBase64 *bool    `json:"secret_is_base64,omitempty"`
 }
 
 type FileLogConfig struct {
@@ -378,5 +378,5 @@ type FileLogConfig struct {
 
 type KeyAuthenticationConfig struct {
 	KeyNames        []string `json:"key_names,omitempty"`
-	HideCredentials bool     `json:"hide_credentials,omitempty"`
+	HideCredentials *bool    `json:"hide_credentials,omitempty"`
 }

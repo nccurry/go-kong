@@ -28,7 +28,7 @@ type Apis struct {
 // Api represents a single Kong api object.
 type Api struct {
 	UpstreamURL      string `json:"upstream_url,omitempty"`
-	StripRequestPath bool   `json:"strip_request_path,omitempty"`
+	StripRequestPath *bool  `json:"strip_request_path,omitempty"`
 	RequestPath      string `json:"request_path,omitempty"`
 	ID               string `json:"id,omitempty"`
 	CreatedAt        int64  `json:"created_at,omitempty"`
