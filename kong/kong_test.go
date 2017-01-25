@@ -343,7 +343,8 @@ func TestCheckResponse(t *testing.T) {
 	r := &http.Response{
 		StatusCode: 200,
 	}
-	err := CheckResponse(r)
+	req, _ := http.NewRequest("GET", "/url", nil)
+	err := CheckResponse(req, r)
 	if err != nil {
 		t.Fatalf("CheckResponse returned unexpected error: %v", err)
 	}
@@ -354,7 +355,8 @@ func TestCheckResponse_badStatusCode(t *testing.T) {
 		StatusCode: 400,
 		Body:       ioutil.NopCloser(bytes.NewBufferString(`{"error": "e"}`)),
 	}
-	err := CheckResponse(r)
+	req, _ := http.NewRequest("GET", "/url", nil)
+	err := CheckResponse(req, r)
 	_, ok := err.(*ErrorResponse)
 	if !ok {
 		t.Fatal("CheckResponse returned the incorrect error type")
@@ -366,7 +368,8 @@ func TestCheckResponse_notFoundStatusCode(t *testing.T) {
 		StatusCode: 404,
 		Body:       ioutil.NopCloser(bytes.NewBufferString(`{"error": "e"}`)),
 	}
-	err := CheckResponse(r)
+	req, _ := http.NewRequest("GET", "/url", nil)
+	err := CheckResponse(req, r)
 	_, ok := err.(*NotFoundError)
 	if !ok {
 		t.Fatal("CheckResponse returned the incorrect error type")
@@ -378,7 +381,8 @@ func TestCheckResponse_conflictStatusCode(t *testing.T) {
 		StatusCode: 409,
 		Body:       ioutil.NopCloser(bytes.NewBufferString(`{"error": "e"}`)),
 	}
-	err := CheckResponse(r)
+	req, _ := http.NewRequest("GET", "/url", nil)
+	err := CheckResponse(req, r)
 	_, ok := err.(*ConflictError)
 	if !ok {
 		t.Fatal("CheckResponse returned the incorrect error type")
