@@ -177,7 +177,7 @@ func (c *Client) Do(req *http.Request, v interface{}) (*http.Response, error) {
 		return nil, err
 	}
 
-	err = CheckResponse(resp)
+	err = CheckResponse(req, resp)
 	if err != nil {
 		// even though there was an error, we still return the response
 		// in case the caller wants to inspect it further
@@ -201,6 +201,7 @@ func (c *Client) Do(req *http.Request, v interface{}) (*http.Response, error) {
 // ErrorResponse is returned from Client.Do if Kong returns a status
 // code outside the 200 range.
 type ErrorResponse struct {
+	Request     *http.Request  // HTTP request object used for the failed request
 	Response    *http.Response // HTTP response that caused this error
 	KongMessage string         `json:"message,omitempty"`
 	KongError   string         `json:"error,omitempty"`
@@ -230,7 +231,7 @@ func (r *NotFoundError) Error() string {
 
 // CheckResponse looks at the response from a Kong API call
 // and determines what type of error needs to be returned, if any.
-func CheckResponse(r *http.Response) error {
+func CheckResponse(req *http.Request, r *http.Response) error {
 	if c := r.StatusCode; 200 <= c && c <= 299 {
 		return nil
 	}
@@ -240,6 +241,12 @@ func CheckResponse(r *http.Response) error {
 	if err == nil && data != nil {
 		json.Unmarshal(data, errorResponse)
 	}
+
+	// Attach request to error
+	errorResponse.Request = req
+
+	// Restore r.Body to its original state after reading
+	r.Body = ioutil.NopCloser(bytes.NewBuffer(data))
 
 	switch r.StatusCode {
 	case 404:

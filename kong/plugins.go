@@ -225,8 +225,13 @@ func isZero(v reflect.Value) bool {
 		}
 		return z
 	case reflect.Ptr:
-		return isZero(reflect.Indirect(v))
+		if v.IsNil() {
+			return true
+		} else {
+			return isZero(reflect.Indirect(v))
+		}
 	}
+
 	// Compare other types directly:
 	z := reflect.Zero(v.Type())
 	result := v.Interface() == z.Interface()
