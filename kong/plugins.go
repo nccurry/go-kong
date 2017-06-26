@@ -381,6 +381,13 @@ type FileLogConfig struct {
 	Path string `json:"path,omitempty"`
 }
 
+type HttpLogConfig struct {
+	HttpEndpoint string `json:"http_endpoint,omitempty"`
+	Method       string `json:"method,omitempty"`
+	Timeout      int    `json:"timeout,omitempty"`
+	KeepAlive    int    `json:"keepalive,omitempty"`
+}
+
 type KeyAuthenticationConfig struct {
 	KeyNames        []string `json:"key_names,omitempty"`
 	HideCredentials *bool    `json:"hide_credentials,omitempty"`
