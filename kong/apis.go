@@ -25,8 +25,8 @@ type Apis struct {
 	Offset string `json:"offset,omitempty"`
 }
 
-// Api represents a single Kong api object.
-type Api struct {
+// ApiRequest represents a Kong api object for api creation.
+type ApiRequest struct {
 	UpstreamURL      string `json:"upstream_url,omitempty"`
 	StripRequestPath *bool  `json:"strip_request_path,omitempty"`
 	RequestPath      string `json:"request_path,omitempty"`
@@ -34,6 +34,19 @@ type Api struct {
 	CreatedAt        int64  `json:"created_at,omitempty"`
 	PreserveHost     bool   `json:"preserve_host,omitempty"`
 	Name             string `json:"name,omitempty"`
+	Hosts            string `json:"hosts,omitempty"`
+}
+
+// Api represents an existing Kong api object
+type Api struct {
+	UpstreamURL      string   `json:"upstream_url,omitempty"`
+	StripRequestPath *bool    `json:"strip_request_path,omitempty"`
+	RequestPath      string   `json:"request_path,omitempty"`
+	ID               string   `json:"id,omitempty"`
+	CreatedAt        int64    `json:"created_at,omitempty"`
+	PreserveHost     bool     `json:"preserve_host,omitempty"`
+	Name             string   `json:"name,omitempty"`
+	Hosts            []string `json:"hosts,omitempty"`
 }
 
 // Get queries for a single Kong api object, by name or id.
@@ -61,7 +74,7 @@ func (s *ApisService) Get(api string) (*Api, *http.Response, error) {
 // the passed *Api parameter.
 //
 // Equivalent to PATCH /apis/{name or id}
-func (s *ApisService) Patch(api *Api) (*http.Response, error) {
+func (s *ApisService) Patch(api *ApiRequest) (*http.Response, error) {
 	var u string
 	if api.Name != "" {
 		u = fmt.Sprintf("apis/%v", api.Name)
@@ -104,7 +117,7 @@ func (s *ApisService) Delete(api string) (*http.Response, error) {
 // Post creates a new Kong api object.
 //
 // Equivalent to POST /apis
-func (s *ApisService) Post(api *Api) (*http.Response, error) {
+func (s *ApisService) Post(api *ApiRequest) (*http.Response, error) {
 	req, err := s.client.NewRequest("POST", "apis", api)
 	if err != nil {
 		return nil, err

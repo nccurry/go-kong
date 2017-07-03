@@ -77,10 +77,10 @@ func TestApisService_Patch_byName(t *testing.T) {
 	stubSetup()
 	defer stubTeardown()
 
-	input := &Api{Name: "n"}
+	input := &ApiRequest{Name: "n"}
 
 	mux.HandleFunc("/apis/n", func(w http.ResponseWriter, r *http.Request) {
-		v := new(Api)
+		v := new(ApiRequest)
 		json.NewDecoder(r.Body).Decode(v)
 		if !reflect.DeepEqual(v, input) {
 			t.Errorf("Request body = %+v, want %+v", v, input)
@@ -100,10 +100,10 @@ func TestApisService_Patch_byID(t *testing.T) {
 	stubSetup()
 	defer stubTeardown()
 
-	input := &Api{ID: "i"}
+	input := &ApiRequest{ID: "i"}
 
 	mux.HandleFunc("/apis/i", func(w http.ResponseWriter, r *http.Request) {
-		v := new(Api)
+		v := new(ApiRequest)
 		json.NewDecoder(r.Body).Decode(v)
 		if !reflect.DeepEqual(v, input) {
 			t.Errorf("Request body = %+v, want %+v", v, input)
@@ -120,13 +120,13 @@ func TestApisService_Patch_byID(t *testing.T) {
 }
 
 func TestApisService_Patch_invalidApi(t *testing.T) {
-	input := &Api{Name: "%"}
+	input := &ApiRequest{Name: "%"}
 	_, err := client.Apis.Patch(input)
 	testURLParseError(t, err)
 }
 
 func TestApisService_Patch_missingIDOrName(t *testing.T) {
-	input := &Api{RequestPath: "r"}
+	input := &ApiRequest{RequestPath: "r"}
 	_, err := client.Apis.Patch(input)
 	if err == nil {
 		t.Error("Expected error to be returned")
@@ -142,7 +142,7 @@ func TestApisService_Patch_badStatusCode(t *testing.T) {
 		fmt.Fprint(w, `{"error":"e"}`)
 	})
 
-	input := &Api{ID: "i"}
+	input := &ApiRequest{ID: "i"}
 
 	_, err := client.Apis.Patch(input)
 	if err == nil {
@@ -188,10 +188,10 @@ func TestApisService_Post(t *testing.T) {
 	stubSetup()
 	defer stubTeardown()
 
-	input := &Api{ID: "i"}
+	input := &ApiRequest{ID: "i"}
 
 	mux.HandleFunc("/apis", func(w http.ResponseWriter, r *http.Request) {
-		v := new(Api)
+		v := new(ApiRequest)
 		json.NewDecoder(r.Body).Decode(v)
 		if !reflect.DeepEqual(v, input) {
 			t.Errorf("Request body = %+v, want %+v", v, input)
@@ -216,7 +216,7 @@ func TestApisService_Post_badStatusCode(t *testing.T) {
 		fmt.Fprint(w, `{"error":"e"}`)
 	})
 
-	input := &Api{ID: "i"}
+	input := &ApiRequest{ID: "i"}
 
 	_, err := client.Apis.Post(input)
 	if err == nil {
