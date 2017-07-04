@@ -94,6 +94,7 @@ func TestUpstreams_Patch_byID(t *testing.T) {
 		t.Errorf("Upstreams.Patch returned error: %v", err)
 	}
 }
+
 func TestUpstream_Patch_invalidUpstream(t *testing.T) {
 	stubSetup()
 	defer stubTeardown()

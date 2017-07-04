@@ -41,7 +41,7 @@ type Target struct {
 	UpstreamID string `json:"upstream_id,omitempty"`
 }
 
-// GetAllActive lists all the active targets attached to the specifed upstream.
+// GetAllActive lists all the active targets attached to the specified upstream.
 //
 // Equivalent to GET/upstreams/{name or id}/targets/active
 func (s *TargetsService) GetAllActive(upstream string) (*Targets, *http.Response, error) {
