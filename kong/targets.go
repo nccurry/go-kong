@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-// TargetsService handles communication with Kong's '/targets' resource.
+// TargetsService handles communication with Kong's '/upstreams/{name or id}/targets' resource.
 type TargetsService struct {
 	*service
 }
