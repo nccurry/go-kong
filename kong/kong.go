@@ -4,12 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/google/go-querystring/query"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"reflect"
+
+	"github.com/google/go-querystring/query"
 )
 
 const (
@@ -39,6 +40,8 @@ type Client struct {
 	Node      *NodeService
 	Cluster   *ClusterService
 	Apis      *ApisService
+	Upstreams *UpstreamsService
+	Targets   *TargetsService
 	Consumers *ConsumersService
 	Plugins   *PluginsService
 }
@@ -101,6 +104,12 @@ func NewClient(httpClient *http.Client, baseURLStr string) (*Client, error) {
 	c.Apis = &ApisService{
 		service: &c.common,
 		Plugins: (*ApisPluginsService)(&c.common),
+	}
+	c.Upstreams = &UpstreamsService{
+		service: &c.common,
+	}
+	c.Targets = &TargetsService{
+		service: &c.common,
 	}
 	c.Consumers = &ConsumersService{
 		service: &c.common,
