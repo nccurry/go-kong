@@ -27,26 +27,40 @@ type Apis struct {
 
 // ApiRequest represents a Kong api object for api creation.
 type ApiRequest struct {
-	UpstreamURL      string `json:"upstream_url,omitempty"`
-	StripRequestPath *bool  `json:"strip_request_path,omitempty"`
-	RequestPath      string `json:"request_path,omitempty"`
-	ID               string `json:"id,omitempty"`
-	CreatedAt        int64  `json:"created_at,omitempty"`
-	PreserveHost     bool   `json:"preserve_host,omitempty"`
-	Name             string `json:"name,omitempty"`
-	Hosts            string `json:"hosts,omitempty"`
+	UpstreamURL            string   `json:"upstream_url,omitempty"`
+	RequestPath            string   `json:"request_path,omitempty"`
+	ID                     string   `json:"id,omitempty"`
+	CreatedAt              int64    `json:"created_at,omitempty"`
+	PreserveHost           bool     `json:"preserve_host,omitempty"`
+	Name                   string   `json:"name,omitempty"`
+	Hosts                  []string `json:"hosts,omitempty"`
+	Uris                   []string `json:"uris"`
+	StripUri               bool     `json:"strip_uri"`
+	Retries                int      `json:"retries"`
+	UpstreamConnectTimeout int      `json:"upstream_connect_timeout"`
+	UpstreamSendTimeout    int      `json:"upstream_send_timeout"`
+	UpstreamReadTimeout    int      `json:"upstream_read_timeout"`
+	HttpsOnly              bool      `json:"https_only"`
+	HttpIfTerminated       bool      `json:"http_if_terminated"`
 }
 
 // Api represents an existing Kong api object
 type Api struct {
-	UpstreamURL      string   `json:"upstream_url,omitempty"`
-	StripRequestPath *bool    `json:"strip_request_path,omitempty"`
-	RequestPath      string   `json:"request_path,omitempty"`
-	ID               string   `json:"id,omitempty"`
-	CreatedAt        int64    `json:"created_at,omitempty"`
-	PreserveHost     bool     `json:"preserve_host,omitempty"`
-	Name             string   `json:"name,omitempty"`
-	Hosts            []string `json:"hosts,omitempty"`
+	UpstreamURL            string   `json:"upstream_url,omitempty"`
+	RequestPath            string   `json:"request_path,omitempty"`
+	ID                     string   `json:"id,omitempty"`
+	CreatedAt              int64    `json:"created_at,omitempty"`
+	PreserveHost           bool     `json:"preserve_host,omitempty"`
+	Name                   string   `json:"name,omitempty"`
+	Hosts                  []string `json:"hosts,omitempty"`
+	Uris                   []string `json:"uris"`
+	StripUri               bool     `json:"strip_uri"`
+	Retries                int      `json:"retries"`
+	UpstreamConnectTimeout int      `json:"upstream_connect_timeout"`
+	UpstreamSendTimeout    int      `json:"upstream_send_timeout"`
+	UpstreamReadTimeout    int      `json:"upstream_read_timeout"`
+	HttpsOnly              bool      `json:"https_only"`
+	HttpIfTerminated       bool      `json:"http_if_terminated"`
 }
 
 // Get queries for a single Kong api object, by name or id.
