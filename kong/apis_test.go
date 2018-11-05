@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"reflect"
 	"testing"
+	"os"
 )
 
 /*
@@ -261,4 +262,36 @@ func TestApisService_GetAll_badStatusCode(t *testing.T) {
 	if err == nil {
 		t.Error("Expected error to be returned")
 	}
+}
+
+func TestGet(t *testing.T) {
+	id := "8dcf8d7a-f173-4367-949f-253320f3eedf"
+ 	baseUrl := os.Getenv("KONG_ADMIN_URL")
+	c, err := NewClient(&http.Client{}, baseUrl)
+	fmt.Errorf("err: %v",err)
+	api, _, err := c.Apis.Get(id)
+	fmt.Errorf("api : %v", api)
+}
+
+
+func TestPost(t *testing.T) {
+	baseUrl := os.Getenv("KONG_ADMIN_URL")
+	c, err := NewClient(&http.Client{}, baseUrl)
+	fmt.Errorf("err: %v",err)
+	apiRequest := &ApiRequest{
+		Name:                   "Example",
+		Hosts:                  []string{"example.com"},
+		Uris:                   []string{"/example"},
+		UpstreamURL:            "http://localhost:4140/testservice",
+		StripUri:               true,
+		PreserveHost:           true,
+		Retries:                3,
+		UpstreamConnectTimeout: 1000,
+		UpstreamSendTimeout:    2000,
+		UpstreamReadTimeout:    3000,
+		HttpsOnly:              true,
+		HttpIfTerminated:       true,
+	}
+	_, err = c.Apis.Post(apiRequest)
+	fmt.Errorf("api : %v", err)
 }
